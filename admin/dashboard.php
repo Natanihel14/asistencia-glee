@@ -1,0 +1,115 @@
+<?php
+/**
+ * admin/dashboard.php — Panel principal del Administrador.
+ * Solo accesible para roles: administrador, supervisor.
+ */
+require_once __DIR__ . '/../auth.php';
+requerirRol(['administrador', 'supervisor']);
+
+$nombre = htmlspecialchars($_SESSION['nombre_completo']);
+$rol    = ucfirst($_SESSION['rol']);
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador — GLEE</title>
+    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="topbar">
+        <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
+        <div class="topbar-usuario">
+            <span><?= $nombre ?> &mdash; <?= $rol ?></span>
+            <a href="/asistencia-glee/logout.php" class="btn-salir">
+                <i class="fa-solid fa-right-from-bracket"></i> Salir
+            </a>
+        </div>
+    </header>
+
+    <main class="contenedor">
+        <div class="bienvenida">
+            <h2>Panel de Administrador</h2>
+            <p>Bienvenido, <?= $nombre ?>. Selecciona una opci&oacute;n para continuar.</p>
+        </div>
+
+        <nav class="menu-grid">
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/usuarios/index.php">
+                <div class="menu-tarjeta-icono">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Gesti&oacute;n de Usuarios</h3>
+                    <p>Crear, editar y eliminar colaboradores</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/sucursales/index.php">
+                <div class="menu-tarjeta-icono azul">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Gesti&oacute;n de Sucursales</h3>
+                    <p>Ver y administrar las 4 tiendas GLEE</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/asistencia/index.php">
+                <div class="menu-tarjeta-icono verde">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Registros de Asistencia</h3>
+                    <p>Ver todas las marcas de entrada y salida</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/reportes/index.php">
+                <div class="menu-tarjeta-icono morado">
+                    <i class="fa-solid fa-chart-bar"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Reportes</h3>
+                    <p>Resumen mensual por colaborador</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/horarios/index.php">
+                <div class="menu-tarjeta-icono" style="background:#16a085">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Horarios</h3>
+                    <p>Asignar turnos y horarios por colaborador</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/asistencia-glee/admin/incidencias/index.php">
+                <div class="menu-tarjeta-icono" style="background:#e67e22">
+                    <i class="fa-solid fa-file-circle-exclamation"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Incidencias</h3>
+                    <p>Aprobar permisos y justificaciones del personal</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta peligro" href="/asistencia-glee/logout.php">
+                <div class="menu-tarjeta-icono rojo">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Cerrar Sesi&oacute;n</h3>
+                    <p>Salir del sistema de forma segura</p>
+                </div>
+            </a>
+
+        </nav>
+    </main>
+
+</body>
+</html>
