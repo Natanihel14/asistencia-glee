@@ -242,6 +242,20 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
         </div>
 
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rolSelect = document.getElementById('rol');
+            const jornadaContainer = document.getElementById('tipo_jornada').closest('.form-grupo');
+
+            function toggleCampos() {
+                const isManagement = ['administrador', 'supervisor'].includes(rolSelect.value);
+                jornadaContainer.style.display = isManagement ? 'none' : 'block';
+            }
+
+            rolSelect.addEventListener('change', toggleCampos);
+            toggleCampos(); // run on load
+        });
+    </script>
 </body>
 </html>
 

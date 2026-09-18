@@ -4,7 +4,12 @@
  * Solo accesible para roles: administrador, supervisor.
  */
 require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../config.php';
 requerirRol(['administrador', 'supervisor']);
+
+$pdo = conectarBD();
+$stmt = $pdo->query("SELECT COUNT(*) FROM incidencias WHERE estado = 'pendiente'");
+$incidenciasPendientes = (int)$stmt->fetchColumn();
 
 $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 $rol    = ucfirst($_SESSION['rol']);
@@ -88,7 +93,12 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/admin/incidencias/index.php">
+            <a class="menu-tarjeta" href="/admin/incidencias/index.php" style="position:relative;">
+                <?php if ($incidenciasPendientes > 0): ?>
+                    <span style="position:absolute; top:-8px; right:-8px; background:#e74c3c; color:white; font-size:0.85rem; font-weight:bold; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+                        <?= $incidenciasPendientes ?>
+                    </span>
+                <?php endif; ?>
                 <div class="menu-tarjeta-icono" style="background:#e67e22">
                     <i class="fa-solid fa-file-circle-exclamation"></i>
                 </div>
