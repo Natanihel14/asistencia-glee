@@ -68,10 +68,9 @@ unset($_SESSION["username_previo"]);
 <body class="login-body">
 
     <div class="login-card">
-        <div class="login-logo">
-            <img src="/assets/img/logo.png" alt="GLEE Logo" style="width: 120px; height: auto; border-radius: 15px; margin-bottom: 0.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-            <h1 style="margin:0; font-size: 1.8rem;">GLEE</h1>
-            <p style="margin-top:0.25rem;">Sistema de Control de Asistencia</p>
+        <div class="login-logo" style="margin-bottom: 2rem;">
+            <h1 style="margin:0; font-family: 'Georgia', serif; font-size: 2.5rem; letter-spacing: 6px; font-weight: bold; color: var(--primario);">GLEE</h1>
+            <p style="margin-top:0.5rem; font-size: 0.85rem; letter-spacing: 2px; color: var(--gris); text-transform: uppercase;">Control de Asistencia</p>
         </div>
 
         <form method="POST" action="/index.php" novalidate>
