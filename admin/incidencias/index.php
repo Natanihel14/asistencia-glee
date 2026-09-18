@@ -231,12 +231,39 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
     </main>
 
+    <!-- Modal para Respuesta -->
+    <div id="modal-respuesta" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999; padding:1rem;">
+        <div style="background:#fff; padding:1.5rem; border-radius:12px; width:100%; max-width:380px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+            <h3 id="modal-titulo" style="margin-top:0; color:var(--primario); margin-bottom:1rem;"><i class="fa-solid fa-comment-dots"></i> Responder Solicitud</h3>
+            <div class="form-grupo" style="margin-bottom:1.5rem;">
+                <label for="modal-input">Observación (Opcional):</label>
+                <input type="text" id="modal-input" placeholder="Ej. Todo en orden..." style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" class="btn btn-gris" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn btn-primario" id="modal-btn-confirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     function prepararRespuesta(forma, accion) {
-        const etiqueta  = accion === 'aprobada' ? 'aprobar' : 'rechazar';
-        const respuesta = prompt('Observación (opcional) para ' + etiqueta + ' esta solicitud:') ?? '';
-        forma.querySelector('.campo-respuesta').value = respuesta;
-        return true;
+        const etiqueta = accion === 'aprobada' ? 'Aprobar' : 'Rechazar';
+        document.getElementById('modal-titulo').innerHTML = '<i class="fa-solid fa-comment-dots"></i> ' + etiqueta + ' Solicitud';
+        document.getElementById('modal-input').value = '';
+        
+        document.getElementById('modal-btn-confirmar').onclick = function() {
+            forma.querySelector('.campo-respuesta').value = document.getElementById('modal-input').value;
+            forma.submit();
+        };
+        
+        document.getElementById('modal-respuesta').style.display = 'flex';
+        setTimeout(() => document.getElementById('modal-input').focus(), 100);
+        return false; // previene el envo automtico
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal-respuesta').style.display = 'none';
     }
     </script>
 

@@ -53,8 +53,8 @@ $filename = "Reporte_GLEE_{$anio}_{$mes}.xls";
 header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 header("Content-Disposition: attachment; filename=\"$filename\"");
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
 ?>
-<?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" 
           xmlns:o="urn:schemas-microsoft-com:office:office" 
           xmlns:x="urn:schemas-microsoft-com:office:excel" 
