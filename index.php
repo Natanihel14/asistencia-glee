@@ -57,14 +57,21 @@ unset($_SESSION["username_previo"]);
     <title>GLEE - Iniciar Sesión</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <link rel="apple-touch-icon" href="/assets/img/logo.png">
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="login-body">
 
     <div class="login-card">
         <div class="login-logo">
-            <h1>GLEE</h1>
-            <p>Sistema de Control de Asistencia</p>
+            <img src="/assets/img/logo.png" alt="GLEE Logo" style="width: 120px; height: auto; border-radius: 15px; margin-bottom: 0.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <h1 style="margin:0; font-size: 1.8rem;">GLEE</h1>
+            <p style="margin-top:0.25rem;">Sistema de Control de Asistencia</p>
         </div>
 
         <form method="POST" action="/index.php" novalidate>
@@ -108,5 +115,17 @@ unset($_SESSION["username_previo"]);
             });
         </script>
     <?php endif; ?>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registrado: ', registration);
+          }).catch(registrationError => {
+            console.log('Error en registro de SW: ', registrationError);
+          });
+        });
+      }
+    </script>
 </body>
 </html>

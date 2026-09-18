@@ -17,6 +17,11 @@ $rol    = ucfirst($_SESSION['rol']);
     <title>Mi Panel &mdash; GLEE</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <link rel="apple-touch-icon" href="/assets/img/logo.png">
 </head>
 <body>
 
@@ -81,5 +86,12 @@ $rol    = ucfirst($_SESSION['rol']);
         </nav>
     </main>
 
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
 </body>
 </html>

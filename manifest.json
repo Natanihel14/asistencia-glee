@@ -1,0 +1,26 @@
+{
+  "name": "GLEE Asistencia",
+  "short_name": "GLEE",
+  "description": "Sistema de Control de Asistencia y Bolsa de Horas",
+  "start_url": "/index.php",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#e67e22",
+  "icons": [
+    {
+      "src": "/assets/img/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/assets/img/logo.png",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/assets/img/logo.png",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
