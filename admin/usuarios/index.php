@@ -25,7 +25,7 @@ $filtroSucursal = (is_numeric($filtroSucursal) && $filtroSucursal !== '') ? (int
 
 // ── Consulta dinámica ─────────────────────────────────────────
 $sql    = '
-    SELECT u.id, u.nombre_completo, u.correo, u.rol, u.tipo_jornada, u.activo,
+    SELECT u.id, u.nombre_completo, u.username, u.rol, u.tipo_jornada, u.activo,
            COALESCE(s.nombre, "—") AS sucursal_nombre
       FROM usuarios u
       LEFT JOIN sucursales s ON u.sucursal_id = s.id
@@ -68,7 +68,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Usuarios — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -77,7 +77,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -85,7 +85,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
     <main class="contenedor">
 
-        <a class="volver" href="/asistencia-glee/admin/dashboard.php">
+        <a class="volver" href="/admin/dashboard.php">
             <i class="fa-solid fa-arrow-left"></i> Volver al panel
         </a>
 
@@ -159,12 +159,12 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                 </p>
             <?php else: ?>
                 <div class="tabla-contenedor">
-                    <table>
+                    <div class="table-responsive"><table>
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Nombre completo</th>
-                                <th>Correo</th>
+                                <th>Usuario</th>
                                 <th>Rol</th>
                                 <th>Jornada</th>
                                 <th>Sucursal</th>
@@ -177,53 +177,48 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                             <tr>
                                 <td><?= $u['id'] ?></td>
                                 <td><?= htmlspecialchars($u['nombre_completo']) ?></td>
-                                <td><?= htmlspecialchars($u['correo']) ?></td>
+                                <td><?= htmlspecialchars($u['username']) ?></td>
                                 <td>
                                     <span class="badge badge-<?= $u['rol'] ?>">
                                         <?= ucfirst($u['rol']) ?>
                                     </span>
                                 </td>
-                                <td>
-                                    <?php if (($u['tipo_jornada'] ?? 'completa') === 'media'): ?>
-                                        <span class="badge" style="background:#e8d5f5;color:#5a1a8a">Media</span>
-                                    <?php else: ?>
-                                        <span class="badge" style="background:#dce8ff;color:#1a3a8a">Completa</span>
-                                    <?php endif; ?>
-                                </td>
+                                <td><?= ucfirst($u['tipo_jornada'] ?? 'completa') ?></td>
                                 <td><?= htmlspecialchars($u['sucursal_nombre']) ?></td>
                                 <td>
                                     <?php if ($u['activo']): ?>
-                                        <span class="badge" style="background:#d4f4e0;color:#155724">Activo</span>
+                                        <span style="color:#155724; font-weight:600;">Activo</span>
                                     <?php else: ?>
-                                        <span class="badge" style="background:#f8d7da;color:#721c24">Inactivo</span>
+                                        <span style="color:#721c24; font-weight:600;">Inactivo</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="acciones">
-                                        <a href="editar.php?id=<?= $u['id'] ?>"
-                                           class="btn btn-acento btn-sm">
-                                            <i class="fa-solid fa-pen"></i> Editar
-                                        </a>
-                                        <?php if ((int)$u['id'] !== (int)$_SESSION['usuario_id']): ?>
-                                            <?php if ($u['activo']): ?>
-                                                <button type="button" class="btn btn-peligro btn-sm"
-                                                        onclick="abrirModalDesactivar(<?= $u['id'] ?>, '<?= htmlspecialchars(addslashes($u['nombre_completo'])) ?>')">
-                                                    <i class="fa-solid fa-user-slash"></i> Desactivar
-                                                </button>
-                                            <?php else: ?>
-                                                <span style="font-size:.8rem;color:var(--gris);padding:.35rem .5rem">
-                                                    <i class="fa-solid fa-user-slash"></i> Inactivo
-                                                </span>
-                                            <?php endif; ?>
+                                    <div class="acciones" style="flex-direction: column; gap: 0.25rem; align-items: flex-start;">
+                                    <a href="editar.php?id=<?= $u['id'] ?>"
+                                       class="btn btn-acento btn-sm" style="width: 105px; text-align: center;">
+                                        <i class="fa-solid fa-pen"></i> Editar
+                                    </a>
+                                    <?php if ((int)$u['id'] !== (int)$_SESSION['usuario_id']): ?>
+                                        <?php if ($u['activo']): ?>
+                                            <button type="button" class="btn btn-peligro btn-sm"
+                                                    style="width: 105px; text-align: center;"
+                                                    onclick="abrirModalDesactivar(<?= $u['id'] ?>, '<?= htmlspecialchars(addslashes($u['nombre_completo'])) ?>')">
+                                                <i class="fa-solid fa-user-slash"></i> Desactivar
+                                            </button>
                                         <?php else: ?>
-                                            <span style="font-size:.8rem;color:var(--gris);padding:.35rem .5rem">(tú)</span>
+                                            <span style="font-size:.8rem;color:var(--gris);padding:.35rem .5rem; width: 105px; text-align: center; display: inline-block;">
+                                                <i class="fa-solid fa-user-slash"></i> Inactivo
+                                            </span>
                                         <?php endif; ?>
-                                    </div>
+                                    <?php else: ?>
+                                        <span style="font-size:.8rem;color:var(--gris);padding:.35rem .5rem; width: 105px; text-align: center; display: inline-block;">(tú)</span>
+                                    <?php endif; ?>
+                                </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             <?php endif; ?>
         </div>
@@ -343,3 +338,4 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
 </body>
 </html>
+

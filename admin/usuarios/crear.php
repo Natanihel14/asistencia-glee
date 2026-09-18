@@ -15,7 +15,7 @@ $sucursales = $pdo->query(
 $errores = [];
 $d = [
     'nombre_completo' => '',
-    'correo'          => '',
+    'username'          => '',
     'rol'             => 'vendedor',
     'tipo_jornada'    => 'completa',
     'sucursal_id'     => '',
@@ -23,7 +23,7 @@ $d = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $d['nombre_completo'] = trim($_POST['nombre_completo'] ?? '');
-    $d['correo']          = trim($_POST['correo']          ?? '');
+    $d['username']          = trim($_POST['username']          ?? '');
     $d['rol']             = $_POST['rol']                  ?? '';
     $d['tipo_jornada']    = in_array($_POST['tipo_jornada'] ?? '', ['completa','media'], true)
                             ? $_POST['tipo_jornada'] : 'completa';
@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($d['nombre_completo'] === '') {
         $errores[] = 'El nombre completo es obligatorio.';
     }
-    if ($d['correo'] === '' || !filter_var($d['correo'], FILTER_VALIDATE_EMAIL)) {
-        $errores[] = 'Ingresa un correo electrónico válido.';
+    if ($d['username'] === '' || preg_match("/\s/", $d['username'])) {
+        $errores[] = 'El usuario no puede contener espacios y es obligatorio.';
     }
     if (strlen($pass) < 6) {
         $errores[] = 'La contraseña debe tener al menos 6 caracteres.';
@@ -44,10 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errores)) {
-        $chk = $pdo->prepare('SELECT 1 FROM usuarios WHERE correo = ?');
-        $chk->execute([$d['correo']]);
+        $chk = $pdo->prepare('SELECT 1 FROM usuarios WHERE username = ?');
+        $chk->execute([$d['username']]);
         if ($chk->fetch()) {
-            $errores[] = 'Ese correo electrónico ya está registrado en el sistema.';
+            $errores[] = 'Ese usuario ya está registrado en el sistema.';
         }
     }
 
@@ -55,12 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sucursalId = ($d['sucursal_id'] !== '') ? (int)$d['sucursal_id'] : null;
 
         $stmt = $pdo->prepare('
-            INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, tipo_jornada, sucursal_id)
+            INSERT INTO usuarios (nombre_completo, username, password_hash, rol, tipo_jornada, sucursal_id)
             VALUES (?, ?, ?, ?, ?, ?)
         ');
         $stmt->execute([
             $d['nombre_completo'],
-            $d['correo'],
+            $d['username'],
             password_hash($pass, PASSWORD_DEFAULT),
             $d['rol'],
             $d['tipo_jornada'],
@@ -84,7 +84,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuevo Usuario — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -93,7 +93,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -132,10 +132,10 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
                 </div>
 
                 <div class="form-grupo">
-                    <label for="correo">Correo electrónico *</label>
-                    <input type="email" id="correo" name="correo"
-                           value="<?= htmlspecialchars($d['correo']) ?>"
-                           placeholder="usuario@glee.com" required>
+                    <label for="username">Usuario *</label>
+                    <input type="text" id="username" name="username"
+                           value="<?= htmlspecialchars($d['username']) ?>"
+                           placeholder="Ej. admin, vendedor1" required>
                 </div>
 
                 <div class="form-grupo">
@@ -147,7 +147,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
                            placeholder="••••••••" required>
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:.75rem">
                     <div class="form-grupo" style="margin:0">
                         <label for="rol">Rol *</label>
                         <select id="rol" name="rol" required>
@@ -200,3 +200,4 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
     </main>
 </body>
 </html>
+

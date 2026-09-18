@@ -4,7 +4,7 @@
 // hasheadas correctamente con password_hash().
 //
 // ¡EJECUTAR UNA SOLA VEZ y luego ELIMINAR este archivo!
-// URL: http://localhost/asistencia-glee/semillas.php
+// URL: http://localhost/semillas.php
 // ============================================================
 
 require_once __DIR__ . '/config.php';
@@ -15,14 +15,14 @@ $pdo = conectarBD();
 $usuarios = [
     [
         'nombre_completo' => 'Administrador GLEE',
-        'correo'          => 'admin@glee.com',
+        'correo'          => 'admin',
         'password'        => 'Admin123',
         'rol'             => 'administrador',
         'sucursal_id'     => null,          // el admin no pertenece a una sola sucursal
     ],
     [
         'nombre_completo' => 'Vendedor de Prueba',
-        'correo'          => 'vendedor@glee.com',
+        'correo'          => 'vendedor',
         'password'        => 'Vendedor123',
         'rol'             => 'vendedor',
         'sucursal_id'     => 1,             // Tienda Jalapa / Bodega Central
@@ -86,8 +86,8 @@ $stmtInsertar = $pdo->prepare('
     <hr>
     <p><strong>Credenciales de prueba:</strong></p>
     <ul>
-        <li>Admin: <code>admin@glee.com</code> / <code>Admin123</code></li>
-        <li>Vendedor: <code>vendedor@glee.com</code> / <code>Vendedor123</code></li>
+        <li>Admin: <code>admin</code> / <code>Admin123</code></li>
+        <li>Vendedor: <code>vendedor</code> / <code>Vendedor123</code></li>
     </ul>
     <p style="color:#c00">
         ⚠️ <strong>Elimina este archivo</strong> después de usarlo.

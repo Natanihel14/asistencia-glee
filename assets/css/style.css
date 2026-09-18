@@ -365,3 +365,6 @@ tbody tr:hover { background: #f4f8fc; }
 @media (min-width: 900px) {
   .contenedor { padding: 2rem 1.5rem; }
 }
+
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+

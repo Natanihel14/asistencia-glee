@@ -5,11 +5,13 @@
 // o con ruta relativa al raíz según la profundidad del archivo.
 // ============================================================
 
-define('DB_HOST',    'localhost');
+define('DB_HOST',    '127.0.0.1');
 define('DB_NAME',    'glee_asistencia');
 define('DB_USER',    'root');
 define('DB_PASS',    '');           // Laragon: contraseña vacía por defecto
 define('DB_CHARSET', 'utf8mb4');
+
+date_default_timezone_set('America/Guatemala');
 
 /**
  * Devuelve una instancia única de PDO (patrón singleton).
@@ -27,12 +29,12 @@ function conectarBD(): PDO
         DB_HOST, DB_NAME, DB_CHARSET
     );
 
-    $opciones = [
+      $opciones = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '-06:00'"
     ];
-
 
 
 

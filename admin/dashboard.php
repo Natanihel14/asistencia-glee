@@ -15,7 +15,7 @@ $rol    = ucfirst($_SESSION['rol']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrador — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -24,7 +24,7 @@ $rol    = ucfirst($_SESSION['rol']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?> &mdash; <?= $rol ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -38,7 +38,7 @@ $rol    = ucfirst($_SESSION['rol']);
 
         <nav class="menu-grid">
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/usuarios/index.php">
+            <a class="menu-tarjeta" href="/admin/usuarios/index.php">
                 <div class="menu-tarjeta-icono">
                     <i class="fa-solid fa-users"></i>
                 </div>
@@ -48,7 +48,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/sucursales/index.php">
+            <a class="menu-tarjeta" href="/admin/sucursales/index.php">
                 <div class="menu-tarjeta-icono azul">
                     <i class="fa-solid fa-store"></i>
                 </div>
@@ -58,7 +58,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/asistencia/index.php">
+            <a class="menu-tarjeta" href="/admin/asistencia/index.php">
                 <div class="menu-tarjeta-icono verde">
                     <i class="fa-solid fa-clipboard-list"></i>
                 </div>
@@ -68,7 +68,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/reportes/index.php">
+            <a class="menu-tarjeta" href="/admin/reportes/index.php">
                 <div class="menu-tarjeta-icono morado">
                     <i class="fa-solid fa-chart-bar"></i>
                 </div>
@@ -78,7 +78,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/horarios/index.php">
+            <a class="menu-tarjeta" href="/admin/horarios/index.php">
                 <div class="menu-tarjeta-icono" style="background:#16a085">
                     <i class="fa-solid fa-calendar-days"></i>
                 </div>
@@ -88,7 +88,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/admin/incidencias/index.php">
+            <a class="menu-tarjeta" href="/admin/incidencias/index.php">
                 <div class="menu-tarjeta-icono" style="background:#e67e22">
                     <i class="fa-solid fa-file-circle-exclamation"></i>
                 </div>
@@ -98,7 +98,18 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta peligro" href="/asistencia-glee/logout.php">
+            <!-- NUEVO BOTÓN: REGISTRO BIOMÉTRICO -->
+            <a class="menu-tarjeta" href="/admin/registro_facial.php">
+                <div class="menu-tarjeta-icono" style="background:#8e44ad">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Registro Biométrico</h3>
+                    <p>Enrolar rostros para reconocimiento facial</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta peligro" href="/logout.php">
                 <div class="menu-tarjeta-icono rojo">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </div>

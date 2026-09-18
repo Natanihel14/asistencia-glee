@@ -103,7 +103,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Sucursal — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -112,7 +112,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -170,7 +170,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                     clic derecho sobre la tienda &rarr; copiar las coordenadas.
                 </p>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:.75rem">
                     <div class="form-grupo" style="margin:0">
                         <label for="latitud">Latitud *</label>
                         <input type="text" id="latitud" name="latitud"

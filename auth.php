@@ -5,7 +5,7 @@
  */
 
 // Ruta base de la aplicación (sin barra final)
-define('APP_URL', '/asistencia-glee');
+define('APP_URL', '');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

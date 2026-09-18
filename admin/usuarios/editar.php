@@ -35,7 +35,7 @@ $sucursales = $pdo->query(
 $errores = [];
 $d = [
     'nombre_completo' => $usuario['nombre_completo'],
-    'correo'          => $usuario['correo'],
+    'username'          => $usuario['username'],
     'rol'             => $usuario['rol'],
     'tipo_jornada'    => $usuario['tipo_jornada'] ?? 'completa',
     'sucursal_id'     => $usuario['sucursal_id'] ?? '',
@@ -44,21 +44,23 @@ $d = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $d['nombre_completo'] = trim($_POST['nombre_completo'] ?? '');
-    $d['correo']          = trim($_POST['correo']          ?? '');
+    $d['username']          = trim($_POST['username']          ?? '');
     $d['rol']             = $_POST['rol']                  ?? '';
     $d['tipo_jornada']    = in_array($_POST['tipo_jornada'] ?? '', ['completa','media'], true)
                             ? $_POST['tipo_jornada'] : 'completa';
     $d['sucursal_id']     = $_POST['sucursal_id']          ?? '';
     $d['activo']          = (int)($_POST['activo']         ?? 1);
-    $pass                 = $_POST['password']             ?? '';
+    $d['password']        = $_POST['password']             ?? '';
 
     if ($d['nombre_completo'] === '') {
         $errores[] = 'El nombre completo es obligatorio.';
     }
-    if ($d['correo'] === '' || !filter_var($d['correo'], FILTER_VALIDATE_EMAIL)) {
-        $errores[] = 'Ingresa un correo electrónico válido.';
+    if ($d['username'] === '' || preg_match("/\s/", $d['username'])) {
+        $errores[] = 'El usuario no puede contener espacios y es obligatorio.';
     }
-    if ($pass !== '' && strlen($pass) < 6) {
+
+    // Si se escribió un password, validarlo
+    if ($d['password'] !== '' && strlen($d['password']) < 6) {
         $errores[] = 'La nueva contraseña debe tener al menos 6 caracteres.';
     }
     if (!in_array($d['rol'], ['administrador', 'supervisor', 'vendedor', 'bodega'], true)) {
@@ -66,37 +68,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errores)) {
-        $chk = $pdo->prepare('SELECT 1 FROM usuarios WHERE correo = ? AND id != ?');
-        $chk->execute([$d['correo'], $id]);
+        // Verificar que el correo no lo tenga OTRO usuario
+        $chk = $pdo->prepare('SELECT 1 FROM usuarios WHERE username = ? AND id != ?');
+        $chk->execute([$d['username'], $id]);
         if ($chk->fetch()) {
-            $errores[] = 'Ese correo ya está registrado por otro usuario.';
+            $errores[] = 'Ese usuario ya está registrado por otra persona.';
         }
     }
 
     if (empty($errores)) {
         $sucursalId = ($d['sucursal_id'] !== '') ? (int)$d['sucursal_id'] : null;
 
-        if ($pass !== '') {
+        if ($d['password'] !== '') {
             $stmt = $pdo->prepare('
                 UPDATE usuarios
-                   SET nombre_completo = ?, correo = ?, password_hash = ?,
+                   SET nombre_completo = ?, username = ?, password_hash = ?,
                        rol = ?, tipo_jornada = ?, sucursal_id = ?, activo = ?
                  WHERE id = ?
             ');
             $stmt->execute([
-                $d['nombre_completo'], $d['correo'],
-                password_hash($pass, PASSWORD_DEFAULT),
+                $d['nombre_completo'], $d['username'],
+                password_hash($d['password'], PASSWORD_DEFAULT),
                 $d['rol'], $d['tipo_jornada'], $sucursalId, $d['activo'], $id,
             ]);
         } else {
             $stmt = $pdo->prepare('
                 UPDATE usuarios
-                   SET nombre_completo = ?, correo = ?,
+                   SET nombre_completo = ?, username = ?,
                        rol = ?, tipo_jornada = ?, sucursal_id = ?, activo = ?
                  WHERE id = ?
             ');
             $stmt->execute([
-                $d['nombre_completo'], $d['correo'],
+                $d['nombre_completo'], $d['username'],
                 $d['rol'], $d['tipo_jornada'], $sucursalId, $d['activo'], $id,
             ]);
         }
@@ -118,7 +121,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuario — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -127,7 +130,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -167,9 +170,9 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
                 </div>
 
                 <div class="form-grupo">
-                    <label for="correo">Correo electrónico *</label>
-                    <input type="email" id="correo" name="correo"
-                           value="<?= htmlspecialchars($d['correo']) ?>" required>
+                    <label for="username">Usuario *</label>
+                    <input type="text" id="username" name="username"
+                           value="<?= htmlspecialchars($d['username']) ?>" required>
                 </div>
 
                 <div class="form-grupo">
@@ -180,7 +183,7 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
                     <input type="password" id="password" name="password" placeholder="••••••••">
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:.75rem">
                     <div class="form-grupo" style="margin:0">
                         <label for="rol">Rol *</label>
                         <select id="rol" name="rol" required>
@@ -241,3 +244,4 @@ $roles  = ['administrador' => 'Administrador', 'supervisor' => 'Supervisor',
     </main>
 </body>
 </html>
+

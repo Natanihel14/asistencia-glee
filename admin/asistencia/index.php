@@ -40,7 +40,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registros de Asistencia — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -49,7 +49,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -57,7 +57,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
     <main class="contenedor">
 
-        <a class="volver" href="/asistencia-glee/admin/dashboard.php">
+        <a class="volver" href="/admin/dashboard.php">
             <i class="fa-solid fa-arrow-left"></i> Volver al panel
         </a>
 
@@ -90,14 +90,14 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                 </p>
             <?php else: ?>
                 <div class="tabla-contenedor">
-                    <table>
+                    <div class="table-responsive"><table>
                         <thead>
                             <tr>
                                 <th>Colaborador</th>
                                 <th>Sucursal</th>
                                 <th>Tipo</th>
                                 <th>Fecha y hora</th>
-                                <th>Geocerca</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -125,19 +125,11 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                 <td style="white-space:nowrap">
                                     <?= date('d/m/Y H:i', strtotime($m['fecha_hora'])) ?>
                                 </td>
-                                <td>
-                                    <?php if ($m['dentro_geocerca'] === null): ?>
-                                        <span style="color:var(--gris)">—</span>
-                                    <?php elseif ($m['dentro_geocerca']): ?>
-                                        <span style="color:var(--exito)"><i class="fa-solid fa-check"></i> Dentro</span>
-                                    <?php else: ?>
-                                        <span style="color:var(--peligro)"><i class="fa-solid fa-xmark"></i> Fuera</span>
-                                    <?php endif; ?>
-                                </td>
+                                
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
                 <p style="font-size:.82rem;color:var(--gris);margin-top:.75rem">
                     Mostrando los últimos <?= count($marcas) ?> registros.
@@ -148,3 +140,4 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     </main>
 </body>
 </html>
+

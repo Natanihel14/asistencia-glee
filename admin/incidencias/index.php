@@ -69,7 +69,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incidencias — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .tabs { display:flex; gap:.5rem; margin-bottom:1.25rem; flex-wrap:wrap; }
@@ -89,7 +89,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -97,7 +97,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
     <main class="contenedor">
 
-        <a class="volver" href="/asistencia-glee/admin/dashboard.php">
+        <a class="volver" href="/admin/dashboard.php">
             <i class="fa-solid fa-arrow-left"></i> Volver al panel
         </a>
 
@@ -148,7 +148,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                 </p>
             <?php else: ?>
                 <div class="tabla-contenedor">
-                    <table>
+                    <div class="table-responsive"><table>
                         <thead>
                             <tr>
                                 <th>Colaborador</th>
@@ -224,7 +224,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
             <?php endif; ?>
         </div>

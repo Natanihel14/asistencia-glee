@@ -15,7 +15,7 @@ $rol    = ucfirst($_SESSION['rol']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Panel &mdash; GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -24,7 +24,7 @@ $rol    = ucfirst($_SESSION['rol']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?> &mdash; <?= $rol ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -38,7 +38,7 @@ $rol    = ucfirst($_SESSION['rol']);
 
         <nav class="menu-grid">
 
-            <a class="menu-tarjeta" href="/asistencia-glee/vendedor/marcar.php">
+            <a class="menu-tarjeta" href="/vendedor/marcar.php">
                 <div class="menu-tarjeta-icono verde">
                     <i class="fa-solid fa-fingerprint"></i>
                 </div>
@@ -48,7 +48,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/vendedor/mis_marcas.php">
+            <a class="menu-tarjeta" href="/vendedor/mis_marcas.php">
                 <div class="menu-tarjeta-icono azul">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                 </div>
@@ -58,7 +58,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/asistencia-glee/vendedor/incidencias.php">
+            <a class="menu-tarjeta" href="/vendedor/incidencias.php">
                 <div class="menu-tarjeta-icono" style="background:#e67e22">
                     <i class="fa-solid fa-file-pen"></i>
                 </div>
@@ -68,7 +68,7 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta peligro" href="/asistencia-glee/logout.php">
+            <a class="menu-tarjeta peligro" href="/logout.php">
                 <div class="menu-tarjeta-icono rojo">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </div>

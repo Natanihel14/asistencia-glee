@@ -77,16 +77,16 @@ $badgeEstado = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incidencias — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
+<style>.select2-container { width: 100% !important; box-sizing: border-box; } .select2-container--default .select2-selection--single { height: 48px; border-radius: 8px; border: 1px solid var(--borde); display: flex; align-items: center; font-size: 1rem; box-sizing: border-box; } .select2-container--default .select2-selection--single .select2-selection__arrow { height: 46px; }</style><link href='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css' rel='stylesheet' /><script src='https://code.jquery.com/jquery-3.7.1.min.js'></script><script src='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js'></script></head>
 <body>
 
     <header class="topbar">
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -94,7 +94,7 @@ $badgeEstado = [
 
     <main class="contenedor">
 
-        <a class="volver" href="/asistencia-glee/vendedor/dashboard.php">
+        <a class="volver" href="/vendedor/dashboard.php">
             <i class="fa-solid fa-arrow-left"></i> Volver al panel
         </a>
 
@@ -125,7 +125,7 @@ $badgeEstado = [
 
             <form method="POST" action="" novalidate>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.75rem">
                     <div class="form-grupo" style="margin:0">
                         <label for="fecha">Fecha del evento *</label>
                         <input type="date" id="fecha" name="fecha"
@@ -150,7 +150,7 @@ $badgeEstado = [
                         Motivo o justificación *
                         <small style="color:var(--gris)">(mínimo 10 caracteres)</small>
                     </label>
-                    <textarea id="motivo" name="motivo" rows="4"
+                    <textarea id="motivo" name="motivo" rows="4" style="resize: none; width: 100%; box-sizing: border-box;"
                               placeholder="Describe brevemente el motivo de tu solicitud..."
                               required><?= htmlspecialchars($d['motivo']) ?></textarea>
                 </div>
@@ -216,5 +216,7 @@ $badgeEstado = [
         </div>
 
     </main>
-</body>
+<script>$(document).ready(function() { $('#tipo').select2({ minimumResultsForSearch: Infinity, width: '100%' }); });</script></body>
 </html>
+
+

@@ -95,8 +95,9 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes — GLEE</title>
-    <link rel="stylesheet" href="/asistencia-glee/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .reporte-seccion { margin-bottom: 2.5rem; }
         .reporte-encabezado {
@@ -140,7 +141,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
         <a class="topbar-marca" href="<?= urlDashboard() ?>">GLEE</a>
         <div class="topbar-usuario">
             <span><?= $nombre ?></span>
-            <a href="/asistencia-glee/logout.php" class="btn-salir">
+            <a href="/logout.php" class="btn-salir">
                 <i class="fa-solid fa-right-from-bracket"></i> Salir
             </a>
         </div>
@@ -148,12 +149,17 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
     <main class="contenedor">
 
-        <a class="volver" href="/asistencia-glee/admin/dashboard.php">
+        <a class="volver" href="/admin/dashboard.php">
             <i class="fa-solid fa-arrow-left"></i> Volver al panel
         </a>
 
-        <div class="seccion-header">
+        <div class="seccion-header" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
             <h2><i class="fa-solid fa-chart-bar"></i> Reporte Mensual de Asistencia</h2>
+            <div style="display:flex; gap:0.5rem;">
+                <a href="exportar_excel.php?mes=<?= $mes ?>&anio=<?= $anio ?>&usuario_id=<?= $usuarioFiltro ?>" class="btn btn-primario" style="background:#1d6f42; border-color:#1d6f42;">
+                    <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+                </a>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -224,17 +230,6 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                     fn($m) => substr($m['fecha_hora'], 0, 10),
                     $datos['marcas']
                 )));
-                $totalRetardoMin  = 0;
-                $marcasFueraGeo   = 0;
-
-                foreach ($datos['marcas'] as $m) {
-                    if ($m['minutos_variacion'] !== null && $m['minutos_variacion'] > 0) {
-                        $totalRetardoMin += (int)$m['minutos_variacion'];
-                    }
-                    if ((int)$m['dentro_geocerca'] === 0) {
-                        $marcasFueraGeo++;
-                    }
-                }
             ?>
 
             <div class="reporte-seccion">
@@ -246,77 +241,102 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                         <span class="badge badge-<?= $datos['rol'] ?>"><?= ucfirst($datos['rol']) ?></span>
                     </div>
 
-                    <div class="tabla-contenedor">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Tipo de marca</th>
-                                    <th>Hora</th>
-                                    <th>Sucursal</th>
-                                    <th>Varianza</th>
-                                    <th>Geocerca</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <?php foreach ($datos['marcas'] as $m):
-                                $tb  = $tiposBadge[$m['tipo']] ?? ['bg'=>'#eee','color'=>'#555','icono'=>'fa-circle','txt'=>$m['tipo']];
-                                $var = $m['minutos_variacion'];
-                                $fecha    = date('d/m/Y', strtotime($m['fecha_hora']));
-                                $diaNom   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][date('w', strtotime($m['fecha_hora']))];
-                                $hora     = date('H:i', strtotime($m['fecha_hora']));
-                            ?>
-                                <tr>
-                                    <td style="white-space:nowrap">
-                                        <span style="font-size:.78rem;color:var(--gris)"><?= $diaNom ?></span>
-                                        <?= $fecha ?>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background:<?= $tb['bg'] ?>;color:<?= $tb['color'] ?>">
-                                            <i class="fa-solid <?= $tb['icono'] ?>"></i> <?= $tb['txt'] ?>
-                                        </span>
-                                    </td>
-                                    <td style="font-weight:600"><?= $hora ?></td>
-                                    <td style="font-size:.88rem"><?= htmlspecialchars($m['sucursal_nombre']) ?></td>
-                                    <td>
-                                        <?php if ($var === null): ?>
-                                            <span class="geo-nd">—</span>
-                                        <?php elseif ((int)$var <= 0): ?>
-                                            <span class="badge-varianza-ok">
-                                                <?= $var == 0 ? 'Puntual' : number_format($var, 0) . ' min' ?>
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge-varianza-mal">
-                                                +<?= (int)$var ?> min
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($m['dentro_geocerca'] === null): ?>
-                                            <span class="geo-nd"><i class="fa-solid fa-minus"></i> Sin GPS</span>
-                                        <?php elseif ((int)$m['dentro_geocerca'] === 1): ?>
-                                            <span class="geo-ok"><i class="fa-solid fa-check"></i> Dentro</span>
-                                        <?php else: ?>
-                                            <span class="geo-fuera"><i class="fa-solid fa-triangle-exclamation"></i> Fuera</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($m['tiene_justificacion']): ?>
-                                            <span class="badge-justificada">
-                                                <i class="fa-solid fa-file-circle-check"></i> Justificada
-                                            </span>
-                                        <?php else: ?>
-                                            <span style="color:var(--gris);font-size:.82rem">—</span>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                      <div class="tabla-contenedor">
+                          <div class="table-responsive"><table>
+                              <thead>
+                                  <tr>
+                                      <th>Fecha</th>
+                                      <th>Entrada</th>
+                                      <th>Salida</th>
+                                      <th>Balance (Bolsa de Horas)</th>
+                                      <th>Incidencias</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                              <?php 
+                              // Agrupar por día para el resumen ejecutivo
+                              $resumenDiario = [];
+                              foreach ($datos['marcas'] as $m) {
+                                  $fecha = substr($m['fecha_hora'], 0, 10);
+                                  if (!isset($resumenDiario[$fecha])) {
+                                      $resumenDiario[$fecha] = [
+                                          'fecha' => $fecha,
+                                          'entrada' => null,
+                                          'salida' => null,
+                                          'varianza' => null,
+                                          'justificada' => false
+                                      ];
+                                  }
+                                  if ($m['tipo'] === 'entrada' && !$resumenDiario[$fecha]['entrada']) {
+                                      $resumenDiario[$fecha]['entrada'] = date('H:i', strtotime($m['fecha_hora']));
+                                  }
+                                  if ($m['tipo'] === 'salida' || $m['tipo'] === 'salida_comida') {
+                                      // Tomar la última salida registrada
+                                      $resumenDiario[$fecha]['salida'] = date('H:i', strtotime($m['fecha_hora']));
+                                  }
+                                  if ($m['minutos_variacion'] !== null) {
+                                      // Se asume que el cálculo final se guarda en la última marca
+                                      $resumenDiario[$fecha]['varianza'] = (int)$m['minutos_variacion'];
+                                  }
+                                  if ($m['tiene_justificacion']) {
+                                      $resumenDiario[$fecha]['justificada'] = true;
+                                  }
+                              }
+
+                              foreach ($resumenDiario as $dia):
+                                  $fechaFormat = date('d/m/Y', strtotime($dia['fecha']));
+                                  $diaNom = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][date('w', strtotime($dia['fecha']))];
+                              ?>
+                                  <tr>
+                                      <td style="white-space:nowrap">
+                                          <span style="font-size:.78rem;color:var(--gris)"><?= $diaNom ?></span>
+                                          <?= $fechaFormat ?>
+                                      </td>
+                                      <td style="font-weight:600"><?= $dia['entrada'] ?: '<span class="geo-nd">—</span>' ?></td>
+                                      <td style="font-weight:600"><?= $dia['salida'] ?: '<span class="geo-nd">—</span>' ?></td>
+                                      
+                                      <td>
+                                          <?php if ($dia['varianza'] === null): ?>
+                                              <span class="geo-nd">Jornada incompleta</span>
+                                          <?php elseif ($dia['varianza'] <= 0): ?>
+                                              <span class="badge-varianza-ok">
+                                                  <?= $dia['varianza'] == 0 ? 'Horas completas' : '+' . abs($dia['varianza']) . ' min extra' ?>
+                                              </span>
+                                          <?php else: ?>
+                                              <span class="badge-varianza-mal">
+                                                  -<?= $dia['varianza'] ?> min (Faltante)
+                                              </span>
+                                          <?php endif; ?>
+                                      </td>
+                                      
+                                      <td>
+                                          <?php if ($dia['justificada']): ?>
+                                              <span class="badge-justificada">
+                                                  <i class="fa-solid fa-file-circle-check"></i> Justificada
+                                              </span>
+                                          <?php else: ?>
+                                              <span style="color:var(--gris);font-size:.82rem">—</span>
+                                          <?php endif; ?>
+                                      </td>
+                                  </tr>
+                              <?php endforeach; ?>
+                              </tbody>
+                          </table></div>
+                      </div>
 
                     <!-- Resumen del colaborador -->
+                    <?php
+                    $saldoNeto = 0;
+                    foreach ($resumenDiario as $dia) {
+                        if ($dia['varianza'] !== null) {
+                            // Si tiene justificación aprobada y es un retardo/faltante (positivo), se perdona (no se suma)
+                            if ($dia['varianza'] > 0 && !empty($dia['justificada'])) {
+                                continue;
+                            }
+                            $saldoNeto += $dia['varianza'];
+                        }
+                    }
+                    ?>
                     <div class="resumen-grid">
                         <div class="resumen-item">
                             <span class="resumen-valor"><?= $totalMarcas ?></span>
@@ -326,19 +346,67 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                             <span class="resumen-valor"><?= $diasTrabajados ?></span>
                             <span class="resumen-label">Días con registro</span>
                         </div>
-                        <div class="resumen-item">
-                            <span class="resumen-valor <?= $totalRetardoMin > 0 ? 'alerta' : '' ?>">
-                                <?= $totalRetardoMin ?>
-                            </span>
-                            <span class="resumen-label">Min. de retardo acumulado</span>
-                        </div>
-                        <div class="resumen-item">
-                            <span class="resumen-valor <?= $marcasFueraGeo > 0 ? 'alerta' : '' ?>">
-                                <?= $marcasFueraGeo ?>
-                            </span>
-                            <span class="resumen-label">Marcas fuera de geocerca</span>
+                          <div class="resumen-item">
+                              <?php if ($saldoNeto === 0): ?>
+                                  <span class="resumen-valor" style="color:var(--gris)">0 min</span>
+                                  <span class="resumen-label">Saldo Neto (Bolsa de Horas)</span>
+                              <?php elseif ($saldoNeto > 0): ?>
+                                  <span class="resumen-valor alerta"><?= $saldoNeto ?> min</span>
+                                  <span class="resumen-label">Saldo en contra (Retardos)</span>
+                              <?php else: ?>
+                                  <span class="resumen-valor" style="color:#1d6f42">+<?= abs($saldoNeto) ?> min</span>
+                                  <span class="resumen-label">Saldo a favor (Horas extra)</span>
+                              <?php endif; ?>
+                          </div>
+                    </div>
+
+                    <?php
+                    $chartLabels = [];
+                    $chartData = [];
+                    $chartColors = [];
+                    foreach ($resumenDiario as $dia) {
+                        $chartLabels[] = date('d/m', strtotime($dia['fecha']));
+                        $val = $dia['varianza'] !== null ? $dia['varianza'] : 0;
+                        
+                        // Perdonar retardo si hay justificación
+                        if ($val > 0 && !empty($dia['justificada'])) {
+                            $val = 0;
+                        }
+                        
+                        $chartData[] = $val;
+                        $chartColors[] = $val <= 0 ? '#1d6f42' : '#e74c3c';
+                    }
+                    ?>
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <h4 style="margin-bottom: 1rem; color: var(--gris); font-size: 0.9rem; text-align: center;">Gráfico de Rendimiento (Varianza en Minutos)</h4>
+                        <div style="height: 150px;">
+                            <canvas id="grafico-<?= $uid ?>"></canvas>
                         </div>
                     </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            new Chart(document.getElementById("grafico-<?= $uid ?>"), {
+                                type: 'bar',
+                                data: {
+                                    labels: <?= json_encode($chartLabels) ?>,
+                                    datasets: [{
+                                        label: 'Minutos (Negativo = Extra, Positivo = Retardo)',
+                                        data: <?= json_encode($chartData) ?>,
+                                        backgroundColor: <?= json_encode($chartColors) ?>,
+                                        borderRadius: 4
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } },
+                                    scales: {
+                                        y: { beginAtZero: true }
+                                    }
+                                }
+                            });
+                        });
+                    </script>
 
                 </div>
             </div>
@@ -350,3 +418,4 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
     </main>
 </body>
 </html>
+
