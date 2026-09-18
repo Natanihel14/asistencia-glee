@@ -23,10 +23,11 @@ $rol    = ucfirst($_SESSION['rol']);
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- PWA -->
+    <!-- PWA y Favicon -->
+    <link rel="icon" type="image/png" href="/assets/img/logo.png">
+    <link rel="apple-touch-icon" href="/assets/img/logo.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1e293b">
-    <link rel="apple-touch-icon" href="/assets/img/logo.png">
 </head>
 <body>
 
