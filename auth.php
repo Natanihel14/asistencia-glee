@@ -8,6 +8,10 @@
 define('APP_URL', '');
 
 if (session_status() === PHP_SESSION_NONE) {
+    // Para que el servidor no borre las sesiones (Garbage Collector)
+    ini_set('session.gc_maxlifetime', 2592000);
+    session_save_path(__DIR__ . '/sessions');
+    
     session_set_cookie_params([
         'lifetime' => 2592000, // 30 dias
         'path' => '/',
