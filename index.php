@@ -173,7 +173,7 @@ unset($_SESSION["username_previo"]);
                 icon: "error",
                 title: "Error de acceso",
                 text: "<?= htmlspecialchars($error) ?>",
-                confirmButtonColor: "var(--primario)"
+                confirmButtonColor: "#e67e22"
             });
         </script>
     <?php endif; ?>
