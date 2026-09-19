@@ -8,18 +8,13 @@
 define('APP_URL', '');
 
 if (session_status() === PHP_SESSION_NONE) {
-    // Para que el servidor no borre las sesiones (Garbage Collector)
     ini_set('session.gc_maxlifetime', 2592000);
+    ini_set('session.cookie_lifetime', 2592000);
     session_save_path(__DIR__ . '/sessions');
-    
-    session_set_cookie_params([
-        'lifetime' => 2592000, // 30 dias
-        'path' => '/',
-        'secure' => true,
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
     session_start();
+    
+    // Forzar actualización de la cookie en el navegador
+    setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
 }
 
 /**

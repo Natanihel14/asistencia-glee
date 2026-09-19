@@ -3,16 +3,12 @@ require_once __DIR__ . "/config.php";
 
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.gc_maxlifetime', 2592000);
+    ini_set('session.cookie_lifetime', 2592000);
     session_save_path(__DIR__ . '/sessions');
-
-    session_set_cookie_params([
-        'lifetime' => 2592000,
-        'path' => '/',
-        'secure' => true,
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
     session_start();
+    
+    // Forzar actualización de la cookie en el navegador
+    setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
 }
 
 if (!empty($_SESSION["usuario_id"])) {
@@ -40,6 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($usuario && password_verify($password, $usuario["password_hash"])) {
             session_regenerate_id(true);
+            setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
+            
             $_SESSION["usuario_id"]      = $usuario["id"];
             $_SESSION["nombre_completo"] = $usuario["nombre_completo"];
             $_SESSION["rol"]             = $usuario["rol"];
