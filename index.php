@@ -65,6 +65,44 @@ unset($_SESSION["username_previo"]);
     <meta name="theme-color" content="#1e293b">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body.login-body {
+            background: url('/assets/img/bg-login.jpg') no-repeat center center / cover !important;
+        }
+        .login-card {
+            background: rgba(0, 0, 0, 0.6) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+            color: #fff !important;
+        }
+        .login-card h1 {
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .login-card p {
+            color: #cbd5e1 !important;
+        }
+        .login-card .form-grupo label {
+            color: #e2e8f0 !important;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+        .login-card input {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            color: #fff !important;
+        }
+        .login-card input::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+        .login-card input:focus {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: #fff !important;
+        }
+    </style>
 </head>
 <body class="login-body">
 
