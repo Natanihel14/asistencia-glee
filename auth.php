@@ -19,14 +19,38 @@ if (session_status() === PHP_SESSION_NONE) {
 
 /**
  * Verifica que haya sesión activa.
+ * Si no la hay, intenta auto-login con cookie 'remember_user'.
+ * Si falla, redirige al login.
+ */
+function requerirLogin() {
+    if (empty($_SESSION['usuario_id'])) {
+        // Intento de auto-login con cookie persistente
+        if (!empty($_COOKIE['remember_user'])) {
+            $pdo = conectarBD();
+            $stmt = $pdo->prepare("SELECT id, nombre_completo, rol, sucursal_id FROM usuarios WHERE id = ? AND activo = 1");
+            $stmt->execute([$_COOKIE['remember_user']]);
+            $u = $stmt->fetch();
+            if ($u) {
+                $_SESSION['usuario_id'] = $u['id'];
+                $_SESSION['nombre_completo'] = $u['nombre_completo'];
+                $_SESSION['rol'] = $u['rol'];
+                $_SESSION['sucursal_id'] = $u['sucursal_id'];
+                return; // Auto-login exitoso
+            }
+        }
+        
+        header('Location: ' . APP_URL . '/index.php');
+        exit;
+    }
+}
+
+/**
+ * Verifica que haya sesión activa.
  * Si no la hay, redirige al login.
  */
 function requerirSesion(): void
 {
-    if (empty($_SESSION['usuario_id'])) {
-        header('Location: ' . APP_URL . '/index.php');
-        exit;
-    }
+    requerirLogin();
 }
 
 /**

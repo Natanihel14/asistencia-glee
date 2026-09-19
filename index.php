@@ -11,6 +11,19 @@ if (session_status() === PHP_SESSION_NONE) {
     setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
 }
 
+if (empty($_SESSION["usuario_id"]) && !empty($_COOKIE['remember_user'])) {
+    $pdo = conectarBD();
+    $stmt = $pdo->prepare("SELECT id, nombre_completo, rol, sucursal_id FROM usuarios WHERE id = ? AND activo = 1");
+    $stmt->execute([$_COOKIE['remember_user']]);
+    $u = $stmt->fetch();
+    if ($u) {
+        $_SESSION['usuario_id'] = $u['id'];
+        $_SESSION['nombre_completo'] = $u['nombre_completo'];
+        $_SESSION['rol'] = $u['rol'];
+        $_SESSION['sucursal_id'] = $u['sucursal_id'];
+    }
+}
+
 if (!empty($_SESSION["usuario_id"])) {
     $esAdmin = in_array($_SESSION["rol"] ?? "", ["administrador", "supervisor"], true);
     header("Location: /" . ($esAdmin ? "admin/dashboard.php" : "vendedor/dashboard.php"));
@@ -37,6 +50,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($usuario && password_verify($password, $usuario["password_hash"])) {
             session_regenerate_id(true);
             setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
+            
+            // Auto-login persistente (Remember Me)
+            setcookie('remember_user', $usuario["id"], time() + 2592000, "/", "", true, true);
             
             $_SESSION["usuario_id"]      = $usuario["id"];
             $_SESSION["nombre_completo"] = $usuario["nombre_completo"];

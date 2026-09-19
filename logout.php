@@ -15,5 +15,8 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
+// Destruir cookie de autologin
+setcookie('remember_user', '', time() - 3600, '/');
+
 header('Location: ' . APP_URL . '/index.php');
 exit;
