@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
     
     // Forzar actualización de la cookie en el navegador
-    setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
+    setcookie(session_name(), session_id(), time() + 2592000, "/");
 }
 
 if (empty($_SESSION["usuario_id"]) && !empty($_COOKIE['remember_user'])) {
@@ -49,10 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($usuario && password_verify($password, $usuario["password_hash"])) {
             session_regenerate_id(true);
-            setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
+            setcookie(session_name(), session_id(), time() + 2592000, "/");
             
             // Auto-login persistente (Remember Me)
-            setcookie('remember_user', $usuario["id"], time() + 2592000, "/", "", true, true);
+            setcookie('remember_user', $usuario["id"], time() + 2592000, "/");
             
             $_SESSION["usuario_id"]      = $usuario["id"];
             $_SESSION["nombre_completo"] = $usuario["nombre_completo"];

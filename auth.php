@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
     
     // Forzar actualización de la cookie en el navegador
-    setcookie(session_name(), session_id(), time() + 2592000, "/", "", true, true);
+    setcookie(session_name(), session_id(), time() + 2592000, "/");
 }
 
 /**
