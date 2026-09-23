@@ -147,7 +147,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                     </span>
                                 </td>
                                 <td style="white-space:nowrap">
-                                    <?= date('d/m/Y H:i', strtotime($m['fecha_hora'])) ?>
+                                    <?= date('d/m/Y H:i:s', strtotime($m['fecha_hora'])) ?>
                                 </td>
                                 
                             </tr>
