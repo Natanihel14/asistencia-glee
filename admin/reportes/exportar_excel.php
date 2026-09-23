@@ -145,7 +145,7 @@ echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
                 <Cell ss:StyleID="Header"><Data ss:Type="String">Incidencias Aprobadas</Data></Cell>
             </Row>
             <?php foreach ($datos['marcas'] as $m): 
-                $fechaHora = date('d/m/Y H:i', strtotime($m['fecha_hora']));
+                $fechaHora = date('d/m/Y H:i:s', strtotime($m['fecha_hora']));
                 $tipo = ucfirst(str_replace('_', ' ', $m['tipo']));
                 $var = $m['minutos_variacion'] === null ? '' : (int)$m['minutos_variacion'];
                 $incidencias = $m['incidencias_dia'] > 0 ? 'Sí' : 'No';

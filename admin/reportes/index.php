@@ -276,7 +276,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                       ];
                                   }
                                   
-                                  $hora = date('H:i', strtotime($m['fecha_hora']));
+                                  $hora = date('H:i:s', strtotime($m['fecha_hora']));
                                   if ($m['tipo'] === 'entrada') $resumenDiario[$fecha]['entrada'] = $hora;
                                   if ($m['tipo'] === 'salida_comida') $resumenDiario[$fecha]['salida_comida'] = $hora;
                                   if ($m['tipo'] === 'regreso_comida') $resumenDiario[$fecha]['regreso_comida'] = $hora;
