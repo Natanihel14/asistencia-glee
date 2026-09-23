@@ -43,7 +43,7 @@ $rol    = ucfirst($_SESSION['rol']);
 
     <main class="contenedor">
         <div class="bienvenida" style="margin-bottom: <?= $incidenciasPendientes > 0 ? '1rem' : '2rem' ?>;">
-            <h2>Panel de Administrador</h2>
+            <h2>Panel de <?= $_SESSION['rol'] === 'administrador' ? 'Administrador' : 'Supervisor' ?></h2>
             <p>Bienvenido, <?= $nombre ?>. Selecciona una opci&oacute;n para continuar.</p>
         </div>
 
@@ -86,6 +86,26 @@ $rol    = ucfirst($_SESSION['rol']);
                     <p>Administrar geocercas y ubicaciones</p>
                 </div>
             </a>
+
+            <a class="menu-tarjeta" href="/admin/horarios/index.php">
+                <div class="menu-tarjeta-icono" style="background:#16a085">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Horarios</h3>
+                    <p>Asignar turnos y horarios por colaborador</p>
+                </div>
+            </a>
+
+            <a class="menu-tarjeta" href="/admin/registro_facial.php">
+                <div class="menu-tarjeta-icono" style="background:#8e44ad">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <div class="menu-tarjeta-texto">
+                    <h3>Registro Biométrico</h3>
+                    <p>Enrolar rostros para reconocimiento facial</p>
+                </div>
+            </a>
             <?php endif; ?>
 
             <a class="menu-tarjeta" href="/admin/asistencia/index.php">
@@ -108,16 +128,6 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
             </a>
 
-            <a class="menu-tarjeta" href="/admin/horarios/index.php">
-                <div class="menu-tarjeta-icono" style="background:#16a085">
-                    <i class="fa-solid fa-calendar-days"></i>
-                </div>
-                <div class="menu-tarjeta-texto">
-                    <h3>Horarios</h3>
-                    <p>Asignar turnos y horarios por colaborador</p>
-                </div>
-            </a>
-
             <a class="menu-tarjeta" href="/admin/incidencias/index.php" style="position:relative;">
                 <?php if ($incidenciasPendientes > 0): ?>
                     <span style="position:absolute; top:-8px; right:-8px; background:#e74c3c; color:white; font-size:0.85rem; font-weight:bold; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
@@ -130,17 +140,6 @@ $rol    = ucfirst($_SESSION['rol']);
                 <div class="menu-tarjeta-texto">
                     <h3>Incidencias</h3>
                     <p>Aprobar permisos y justificaciones del personal</p>
-                </div>
-            </a>
-
-            <!-- NUEVO BOTÓN: REGISTRO BIOMÉTRICO -->
-            <a class="menu-tarjeta" href="/admin/registro_facial.php">
-                <div class="menu-tarjeta-icono" style="background:#8e44ad">
-                    <i class="fa-solid fa-user-lock"></i>
-                </div>
-                <div class="menu-tarjeta-texto">
-                    <h3>Registro Biométrico</h3>
-                    <p>Enrolar rostros para reconocimiento facial</p>
                 </div>
             </a>
 
