@@ -26,6 +26,7 @@ function requerirLogin() {
     if (empty($_SESSION['usuario_id'])) {
         // Intento de auto-login con cookie persistente
         if (!empty($_COOKIE['remember_user'])) {
+            require_once __DIR__ . '/config.php';
             $pdo = conectarBD();
             $stmt = $pdo->prepare("SELECT id, nombre_completo, rol, sucursal_id FROM usuarios WHERE id = ? AND activo = 1");
             $stmt->execute([$_COOKIE['remember_user']]);
@@ -71,9 +72,18 @@ function requerirRol(array $rolesPermitidos): void
 {
     requerirSesion();
 
-    if (!in_array($_SESSION['rol'], $rolesPermitidos, true)) {
-        $esAdmin = in_array($_SESSION['rol'], ['administrador', 'supervisor'], true);
-        header('Location: ' . APP_URL . ($esAdmin ? '/admin/dashboard.php' : '/vendedor/dashboard.php'));
+    $rolActual = strtolower(trim($_SESSION['rol'] ?? ''));
+
+    if (!in_array($rolActual, $rolesPermitidos, true)) {
+        $esAdmin = in_array($rolActual, ['administrador', 'supervisor'], true);
+        $destino = APP_URL . ($esAdmin ? '/admin/dashboard.php' : '/vendedor/dashboard.php');
+        
+        // Evitar bucle infinito de redirección
+        if ($_SERVER['REQUEST_URI'] === $destino || $_SERVER['REQUEST_URI'] === $destino . '/') {
+            die("Error de permisos: Tu rol es '{$_SESSION['rol']}', por lo que no puedes ver esta p&aacute;gina.");
+        }
+        
+        header('Location: ' . $destino);
         exit;
     }
 }
