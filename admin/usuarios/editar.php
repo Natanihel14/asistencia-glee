@@ -5,7 +5,7 @@
  */
 require_once __DIR__ . '/../../auth.php';
 require_once __DIR__ . '/../../config.php';
-requerirRol(['administrador', 'supervisor']);
+requerirRol(['administrador']);
 
 $pdo = conectarBD();
 

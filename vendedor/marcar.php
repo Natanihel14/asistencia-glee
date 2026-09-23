@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 } else {
                     // Fallback a jornada estándar si no tiene horario específico asignado
-                    $minutosRequeridos = ($usuario['tipo_jornada'] === 'media') ? 4 * 60 : 8 * 60;
+                    $minutosRequeridos = ($userInfo['tipo_jornada'] === 'media') ? 4 * 60 : 8 * 60;
                 }
 
                 // 2. Extraer tiempos reales del usuario hoy
@@ -489,9 +489,20 @@ $ultimaEtiqueta = $ultimaMarca
             faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models')
         ]).then(() => {
             modelosCargados = true;
-            navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
+            navigator.mediaDevices.getUserMedia({ 
+                video: { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: "user" } 
+            }).then(stream => {
                 video.srcObject = stream;
                 document.getElementById('cam-container').style.display = 'block';
+                
+                // WARMUP: Forzar compilación de shaders en la GPU de iOS en segundo plano
+                video.addEventListener('play', async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1;
+                    canvas.height = 1;
+                    await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions());
+                }, { once: true });
+                
             }).catch(err => console.error("Error activando cámara para biometría", err));
         }).catch(err => console.error("Error cargando modelos face-api", err));
     }

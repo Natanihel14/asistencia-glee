@@ -8,8 +8,13 @@ requerirRol(['administrador', 'supervisor']);
 
 $pdo = conectarBD();
 
-// Filtro opcional por fecha
-$fechaFiltro = trim($_GET['fecha'] ?? '');
+// Filtros opcionales
+// Por defecto mostramos solo los registros de HOY, a menos que el usuario quite la fecha
+$fechaFiltro   = isset($_GET['fecha']) ? trim($_GET['fecha']) : date('Y-m-d');
+$usuarioFiltro = (int)($_GET['usuario_id'] ?? 0);
+
+// Lista de colaboradores para el filtro
+$colaboradores = $pdo->query("SELECT id, nombre_completo FROM usuarios WHERE rol IN ('vendedor','bodega') ORDER BY nombre_completo ASC")->fetchAll();
 
 $sql = '
     SELECT ma.id, ma.tipo, ma.fecha_hora, ma.dentro_geocerca,
@@ -18,12 +23,17 @@ $sql = '
       FROM marcas_asistencia ma
       JOIN usuarios   u ON ma.usuario_id   = u.id
       JOIN sucursales s ON ma.sucursal_id  = s.id
+      WHERE 1=1
 ';
 
 $params = [];
 if ($fechaFiltro !== '') {
-    $sql    .= ' WHERE DATE(ma.fecha_hora) = ?';
+    $sql    .= ' AND DATE(ma.fecha_hora) = ?';
     $params[] = $fechaFiltro;
+}
+if ($usuarioFiltro > 0) {
+    $sql    .= ' AND ma.usuario_id = ?';
+    $params[] = $usuarioFiltro;
 }
 
 $sql .= ' ORDER BY ma.fecha_hora DESC LIMIT 200';
@@ -65,7 +75,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
             <h2><i class="fa-solid fa-clipboard-list"></i> Registros de Asistencia</h2>
         </div>
 
-        <!-- Filtro por fecha -->
+        <!-- Filtro por fecha y colaborador -->
         <div class="tarjeta" style="margin-bottom:1rem;padding:1rem 1.25rem">
             <form method="GET" action="" style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
                 <div class="form-grupo" style="margin:0;flex:1;min-width:160px">
@@ -73,11 +83,25 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                     <input type="date" id="fecha" name="fecha"
                            value="<?= htmlspecialchars($fechaFiltro) ?>">
                 </div>
+                <div class="form-grupo" style="margin:0;flex:2;min-width:200px">
+                    <label for="usuario_id">Colaborador</label>
+                    <select id="usuario_id" name="usuario_id">
+                        <option value="0">Todos los colaboradores</option>
+                        <?php foreach ($colaboradores as $c): ?>
+                            <option value="<?= $c['id'] ?>" <?= $usuarioFiltro === (int)$c['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($c['nombre_completo']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-primario btn-sm">
                     <i class="fa-solid fa-magnifying-glass"></i> Filtrar
                 </button>
-                <?php if ($fechaFiltro !== ''): ?>
-                    <a href="?" class="btn btn-gris btn-sm">Limpiar</a>
+                <a href="?fecha=&usuario_id=0" class="btn btn-gris btn-sm">
+                    <i class="fa-solid fa-list"></i> Ver todo el historial
+                </a>
+                <?php if ($fechaFiltro !== date('Y-m-d') || $usuarioFiltro > 0): ?>
+                    <a href="?" class="btn btn-gris btn-sm">Limpiar (Hoy)</a>
                 <?php endif; ?>
             </form>
         </div>

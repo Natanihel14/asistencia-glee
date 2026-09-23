@@ -6,7 +6,7 @@
  */
 require_once __DIR__ . '/../../auth.php';
 require_once __DIR__ . '/../../config.php';
-requerirRol(['administrador', 'supervisor']);
+requerirRol(['administrador']);
 
 // Solo se procesa si la petición es POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

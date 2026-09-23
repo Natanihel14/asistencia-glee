@@ -31,10 +31,11 @@ $colaboradores = $pdo->query("
 $sql = "
     SELECT
         ma.id, ma.tipo, ma.fecha_hora, ma.dentro_geocerca, ma.minutos_variacion,
-        u.id   AS usuario_id,
-        u.nombre_completo,
-        u.rol,
-        s.nombre AS sucursal_nombre,
+          u.id   AS usuario_id,
+          u.nombre_completo,
+          u.rol,
+          u.tipo_jornada,
+          s.nombre AS sucursal_nombre,
         EXISTS (
             SELECT 1 FROM incidencias i
              WHERE i.usuario_id = ma.usuario_id
@@ -66,9 +67,10 @@ foreach ($todasMarcas as $m) {
     $uid = $m['usuario_id'];
     if (!isset($porColaborador[$uid])) {
         $porColaborador[$uid] = [
-            'nombre' => $m['nombre_completo'],
-            'rol'    => $m['rol'],
-            'marcas' => [],
+            'nombre'       => $m['nombre_completo'],
+            'rol'          => $m['rol'],
+            'tipo_jornada' => $m['tipo_jornada'],
+            'marcas'       => [],
         ];
     }
     $porColaborador[$uid]['marcas'][] = $m;
@@ -243,15 +245,19 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
                       <div class="tabla-contenedor">
                           <div class="table-responsive"><table>
-                              <thead>
-                                  <tr>
-                                      <th>Fecha</th>
-                                      <th>Entrada</th>
-                                      <th>Salida</th>
-                                      <th>Balance (Bolsa de Horas)</th>
-                                      <th>Incidencias</th>
-                                  </tr>
-                              </thead>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Entrada</th>
+                                        <?php if ($datos['tipo_jornada'] === 'completa'): ?>
+                                        <th>S. Comida</th>
+                                        <th>R. Comida</th>
+                                        <?php endif; ?>
+                                        <th>Salida</th>
+                                        <th>Balance (Bolsa de Horas)</th>
+                                        <th>Incidencias</th>
+                                    </tr>
+                                </thead>
                               <tbody>
                               <?php 
                               // Agrupar por día para el resumen ejecutivo
@@ -262,20 +268,21 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                       $resumenDiario[$fecha] = [
                                           'fecha' => $fecha,
                                           'entrada' => null,
+                                          'salida_comida' => null,
+                                          'regreso_comida' => null,
                                           'salida' => null,
                                           'varianza' => null,
                                           'justificada' => false
                                       ];
                                   }
-                                  if ($m['tipo'] === 'entrada' && !$resumenDiario[$fecha]['entrada']) {
-                                      $resumenDiario[$fecha]['entrada'] = date('H:i', strtotime($m['fecha_hora']));
-                                  }
-                                  if ($m['tipo'] === 'salida' || $m['tipo'] === 'salida_comida') {
-                                      // Tomar la última salida registrada
-                                      $resumenDiario[$fecha]['salida'] = date('H:i', strtotime($m['fecha_hora']));
-                                  }
+                                  
+                                  $hora = date('H:i', strtotime($m['fecha_hora']));
+                                  if ($m['tipo'] === 'entrada') $resumenDiario[$fecha]['entrada'] = $hora;
+                                  if ($m['tipo'] === 'salida_comida') $resumenDiario[$fecha]['salida_comida'] = $hora;
+                                  if ($m['tipo'] === 'regreso_comida') $resumenDiario[$fecha]['regreso_comida'] = $hora;
+                                  if ($m['tipo'] === 'salida') $resumenDiario[$fecha]['salida'] = $hora;
+                                  
                                   if ($m['minutos_variacion'] !== null) {
-                                      // Se asume que el cálculo final se guarda en la última marca
                                       $resumenDiario[$fecha]['varianza'] = (int)$m['minutos_variacion'];
                                   }
                                   if ($m['tiene_justificacion']) {
@@ -293,11 +300,19 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                           <?= $fechaFormat ?>
                                       </td>
                                       <td style="font-weight:600"><?= $dia['entrada'] ?: '<span class="geo-nd">—</span>' ?></td>
+                                      <?php if ($datos['tipo_jornada'] === 'completa'): ?>
+                                      <td style="font-weight:600"><?= $dia['salida_comida'] ?: '<span class="geo-nd">—</span>' ?></td>
+                                      <td style="font-weight:600"><?= $dia['regreso_comida'] ?: '<span class="geo-nd">—</span>' ?></td>
+                                      <?php endif; ?>
                                       <td style="font-weight:600"><?= $dia['salida'] ?: '<span class="geo-nd">—</span>' ?></td>
                                       
                                       <td>
                                           <?php if ($dia['varianza'] === null): ?>
                                               <span class="geo-nd">Jornada incompleta</span>
+                                          <?php elseif ($dia['justificada'] && $dia['varianza'] > 0): ?>
+                                              <span class="badge-varianza-ok" style="background:#e8f5e9;color:#2e7d32">
+                                                  Tiempo Justificado (0 min)
+                                              </span>
                                           <?php elseif ($dia['varianza'] <= 0): ?>
                                               <span class="badge-varianza-ok">
                                                   <?= $dia['varianza'] == 0 ? 'Horas completas' : '+' . abs($dia['varianza']) . ' min extra' ?>
@@ -311,9 +326,9 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                       
                                       <td>
                                           <?php if ($dia['justificada']): ?>
-                                              <span class="badge-justificada">
+                                              <a href="/admin/incidencias/index.php?estado=aprobada" class="badge-justificada" style="text-decoration:none; display:inline-block">
                                                   <i class="fa-solid fa-file-circle-check"></i> Justificada
-                                              </span>
+                                              </a>
                                           <?php else: ?>
                                               <span style="color:var(--gris);font-size:.82rem">—</span>
                                           <?php endif; ?>

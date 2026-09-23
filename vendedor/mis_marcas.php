@@ -9,18 +9,33 @@ requerirRol(['vendedor', 'bodega']);
 $pdo      = conectarBD();
 $usuarioId = (int)$_SESSION['usuario_id'];
 
-// Últimas 60 marcas del colaborador
-$stmt = $pdo->prepare('
+$fechaFiltro = isset($_GET['fecha']) ? trim($_GET['fecha']) : date('Y-m-d');
+
+$sql = '
     SELECT ma.tipo, ma.fecha_hora, ma.dentro_geocerca,
            s.nombre AS sucursal_nombre
       FROM marcas_asistencia ma
       JOIN sucursales s ON ma.sucursal_id = s.id
      WHERE ma.usuario_id = ?
-     ORDER BY ma.fecha_hora DESC
-     LIMIT 60
-');
-$stmt->execute([$usuarioId]);
+';
+$params = [$usuarioId];
+
+if ($fechaFiltro !== '') {
+    $sql .= ' AND DATE(ma.fecha_hora) = ?';
+    $params[] = $fechaFiltro;
+}
+
+$sql .= ' ORDER BY ma.fecha_hora DESC LIMIT 100';
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $marcas = $stmt->fetchAll();
+
+$mesesNombre = [
+    1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',
+    5=>'Mayo',6=>'Junio',7=>'Julio',8=>'Agosto',
+    9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre',
+];
 
 $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 ?>
@@ -53,6 +68,25 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 
         <div class="seccion-header">
             <h2><i class="fa-solid fa-clock-rotate-left"></i> Mis Marcas de Asistencia</h2>
+        </div>
+
+        <div class="tarjeta" style="margin-bottom:1rem;padding:1rem 1.25rem">
+            <form method="GET" action="" style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
+                <div class="form-grupo" style="margin:0;flex:1;min-width:160px">
+                    <label for="fecha">Filtrar por fecha</label>
+                    <input type="date" id="fecha" name="fecha"
+                           value="<?= htmlspecialchars($fechaFiltro) ?>">
+                </div>
+                <button type="submit" class="btn btn-primario btn-sm">
+                    <i class="fa-solid fa-magnifying-glass"></i> Filtrar
+                </button>
+                <a href="?fecha=" class="btn btn-gris btn-sm">
+                    <i class="fa-solid fa-list"></i> Ver todo
+                </a>
+                <?php if ($fechaFiltro !== date('Y-m-d')): ?>
+                    <a href="?" class="btn btn-gris btn-sm">Limpiar (Hoy)</a>
+                <?php endif; ?>
+            </form>
         </div>
 
         <div class="tarjeta">

@@ -13,6 +13,14 @@ $flashMsg  = $_SESSION['flash_msg']  ?? '';
 $flashTipo = $_SESSION['flash_tipo'] ?? 'exito';
 unset($_SESSION['flash_msg'], $_SESSION['flash_tipo']);
 
+// Marcar como leídas las incidencias que ya tienen respuesta
+try {
+    $stmtUpd = $pdo->prepare("UPDATE incidencias SET leida = 1 WHERE usuario_id = ? AND estado != 'pendiente' AND leida = 0");
+    $stmtUpd->execute([$usuarioId]);
+} catch (Exception $e) {
+    // Si la columna 'leida' no existe aún
+}
+
 $tipos = [
     'permiso'              => 'Permiso de ausencia',
     'retardo_justificado'  => 'Justificación de retardo',
@@ -127,10 +135,10 @@ $badgeEstado = [
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.75rem">
                     <div class="form-grupo" style="margin:0">
-                        <label for="fecha">Fecha del evento *</label>
+                        <label for="fecha">Fecha a justificar *</label>
                         <input type="date" id="fecha" name="fecha"
                                value="<?= htmlspecialchars($d['fecha']) ?>"
-                               max="<?= date('Y-m-d') ?>" required>
+                               required>
                     </div>
                     <div class="form-grupo" style="margin:0">
                         <label for="tipo">Tipo de solicitud *</label>

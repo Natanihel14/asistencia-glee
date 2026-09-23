@@ -42,13 +42,31 @@ $rol    = ucfirst($_SESSION['rol']);
     </header>
 
     <main class="contenedor">
-        <div class="bienvenida">
+        <div class="bienvenida" style="margin-bottom: <?= $incidenciasPendientes > 0 ? '1rem' : '2rem' ?>;">
             <h2>Panel de Administrador</h2>
             <p>Bienvenido, <?= $nombre ?>. Selecciona una opci&oacute;n para continuar.</p>
         </div>
 
+        <?php if ($incidenciasPendientes > 0): ?>
+        <div class="alerta bounce-in" style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 1.25rem; margin-bottom: 2rem; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="display:flex; align-items:center; gap: 1rem; color: #e65100;">
+                <i class="fa-solid fa-bell fa-shake" style="font-size: 1.8rem;"></i>
+                <div>
+                    <h4 style="margin:0; font-size: 1.05rem;">Atención Requerida</h4>
+                    <p style="margin: 0.25rem 0 0; font-size: 0.9rem;">Tienes <strong><?= $incidenciasPendientes ?></strong> solicitud(es) de incidencia pendiente(s) por revisar.</p>
+                </div>
+            </div>
+            <a href="/admin/incidencias/index.php" class="btn btn-primario btn-sm" style="background: #f57c00; color:white; text-decoration:none; padding: 0.5rem 1rem; border-radius: 4px;">Revisar ahora</a>
+        </div>
+        <style>
+            @keyframes bounceIn { 0% { transform: scale(0.9); opacity: 0; } 50% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+            .bounce-in { animation: bounceIn 0.4s ease forwards; }
+        </style>
+        <?php endif; ?>
+
         <nav class="menu-grid">
 
+            <?php if ($_SESSION['rol'] === 'administrador'): ?>
             <a class="menu-tarjeta" href="/admin/usuarios/index.php">
                 <div class="menu-tarjeta-icono">
                     <i class="fa-solid fa-users"></i>
@@ -65,9 +83,10 @@ $rol    = ucfirst($_SESSION['rol']);
                 </div>
                 <div class="menu-tarjeta-texto">
                     <h3>Gesti&oacute;n de Sucursales</h3>
-                    <p>Ver y administrar las 4 tiendas GLEE</p>
+                    <p>Administrar geocercas y ubicaciones</p>
                 </div>
             </a>
+            <?php endif; ?>
 
             <a class="menu-tarjeta" href="/admin/asistencia/index.php">
                 <div class="menu-tarjeta-icono verde">

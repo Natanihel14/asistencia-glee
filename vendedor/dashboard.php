@@ -1,13 +1,23 @@
 <?php
 /**
- * vendedor/dashboard.php — Panel principal del Vendedor / Bodega.
+ * vendedor/dashboard.php - Panel principal del Vendedor / Bodega.
  * Solo accesible para roles: vendedor, bodega.
  */
 require_once __DIR__ . '/../auth.php';
+require_once __DIR__ . '/../config.php';
 requerirRol(['vendedor', 'bodega']);
 
 $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 $rol    = ucfirst($_SESSION['rol']);
+
+$pdo = conectarBD();
+try {
+    $stmtNotif = $pdo->prepare("SELECT COUNT(*) FROM incidencias WHERE usuario_id = ? AND estado != 'pendiente' AND leida = 0");
+    $stmtNotif->execute([$_SESSION['usuario_id']]);
+    $nuevasRespuestas = (int)$stmtNotif->fetchColumn();
+} catch (Exception $e) {
+    $nuevasRespuestas = 0;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -37,10 +47,27 @@ $rol    = ucfirst($_SESSION['rol']);
     </header>
 
     <main class="contenedor">
-        <div class="bienvenida">
+        <div class="bienvenida" style="margin-bottom: <?= $nuevasRespuestas > 0 ? '1rem' : '2rem' ?>;">
             <h2>Mi Panel</h2>
             <p>Bienvenido, <?= $nombre ?>. &iquest;Qu&eacute; deseas hacer hoy?</p>
         </div>
+
+        <?php if ($nuevasRespuestas > 0): ?>
+        <div class="alerta bounce-in" style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 1.25rem; margin-bottom: 2rem; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="display:flex; align-items:center; gap: 1rem; color: #0d47a1;">
+                <i class="fa-solid fa-bell fa-shake" style="font-size: 1.8rem;"></i>
+                <div>
+                    <h4 style="margin:0; font-size: 1.05rem;">Aviso de Administración</h4>
+                    <p style="margin: 0.25rem 0 0; font-size: 0.9rem;">Tienes <strong><?= $nuevasRespuestas ?></strong> solicitud(es) de incidencia con respuesta nueva.</p>
+                </div>
+            </div>
+            <a href="/vendedor/incidencias.php" class="btn btn-primario btn-sm" style="background: #1976d2; color:white; text-decoration:none; padding: 0.5rem 1rem; border-radius: 4px;">Ver estado</a>
+        </div>
+        <style>
+            @keyframes bounceIn { 0% { transform: scale(0.9); opacity: 0; } 50% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+            .bounce-in { animation: bounceIn 0.4s ease forwards; }
+        </style>
+        <?php endif; ?>
 
         <nav class="menu-grid">
 
