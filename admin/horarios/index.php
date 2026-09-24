@@ -20,9 +20,9 @@ $colaboradores = $pdo->query('
       FROM usuarios u
       LEFT JOIN sucursales s ON u.sucursal_id = s.id
       LEFT JOIN horarios   h ON h.usuario_id = u.id AND h.activo = 1
-     WHERE u.rol IN ("vendedor", "bodega")
+     WHERE u.rol IN ("vendedor", "bodega") AND u.activo = 1
      GROUP BY u.id
-     ORDER BY u.activo DESC, u.nombre_completo ASC
+     ORDER BY u.nombre_completo ASC
 ')->fetchAll();
 
 $nombre = htmlspecialchars($_SESSION['nombre_completo']);

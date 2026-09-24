@@ -1,6 +1,6 @@
 <?php
 /**
- * admin/incidencias/index.php — Listado de incidencias para aprobar o rechazar.
+ * admin/incidencias/index.php - Listado de incidencias para aprobar o rechazar.
  */
 require_once __DIR__ . '/../../auth.php';
 require_once __DIR__ . '/../../config.php';
@@ -19,6 +19,8 @@ if (!in_array($filtroEstado, $estadosValidos, true)) {
     $filtroEstado = 'pendiente';
 }
 
+$usuarioFiltro = filter_input(INPUT_GET, 'usuario_id', FILTER_VALIDATE_INT) ?: 0;
+
 $sql    = '
     SELECT i.id, i.fecha, i.tipo, i.motivo, i.estado, i.respuesta, i.created_at,
            u.nombre_completo, u.rol,
@@ -30,11 +32,24 @@ $sql    = '
       LEFT JOIN usuarios a ON i.respondido_por = a.id
 ';
 $params = [];
+$whereClauses = [];
+
 if ($filtroEstado !== 'todos') {
-    $sql    .= ' WHERE i.estado = ?';
+    $whereClauses[] = 'i.estado = ?';
     $params[] = $filtroEstado;
 }
-$sql .= ' ORDER BY i.created_at DESC LIMIT 200';
+
+if ($usuarioFiltro > 0) {
+    $whereClauses[] = 'i.usuario_id = ?';
+    $params[] = $usuarioFiltro;
+}
+
+if (!empty($whereClauses)) {
+    $sql .= ' WHERE ' . implode(' AND ', $whereClauses);
+}
+
+// Ordenar de más nuevo a más viejo por fecha de la incidencia, luego por fecha de creación
+$sql .= ' ORDER BY i.fecha DESC, i.created_at DESC LIMIT 200';
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -47,6 +62,13 @@ foreach ($stmtCnt->fetchAll() as $row) {
     $conteos[$row['estado']] = $row['cnt'];
 }
 $totalPendientes = $conteos['pendiente'] ?? 0;
+
+$colaboradores = $pdo->query("
+    SELECT id, nombre_completo
+      FROM usuarios
+     WHERE rol IN ('vendedor','bodega') AND activo = 1
+     ORDER BY nombre_completo ASC
+")->fetchAll();
 
 $tipos = [
     'permiso'             => 'Permiso de ausencia',
@@ -68,7 +90,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incidencias — GLEE</title>
+    <title>Incidencias - GLEE</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -131,13 +153,37 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                 $activo = $filtroEstado === $val ? ' activo' : '';
                 $cnt    = ($val !== 'todos') ? ($conteos[$val] ?? 0) : array_sum($conteos);
             ?>
-                <a href="?estado=<?= $val ?>" class="tab<?= $activo ?>">
+                <a href="?estado=<?= $val ?>&usuario_id=<?= $usuarioFiltro ?>" class="tab<?= $activo ?>">
                     <?= $etiq ?>
                     <?php if ($cnt > 0): ?>
                         <span style="font-weight:400;color:inherit">(<?= $cnt ?>)</span>
                     <?php endif; ?>
                 </a>
             <?php endforeach; ?>
+        </div>
+
+        <!-- Filtros secundarios -->
+        <div class="tarjeta" style="margin-bottom:1rem;padding:1rem 1.25rem">
+            <form method="GET" action="" style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
+                <input type="hidden" name="estado" value="<?= htmlspecialchars($filtroEstado) ?>">
+                <div class="form-grupo" style="margin:0;flex:1;min-width:200px">
+                    <label for="f-usuario">Filtrar por colaborador</label>
+                    <select id="f-usuario" name="usuario_id">
+                        <option value="">-- Todos los colaboradores --</option>
+                        <?php foreach ($colaboradores as $c): ?>
+                            <option value="<?= $c['id'] ?>" <?= $usuarioFiltro === (int)$c['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($c['nombre_completo']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primario btn-sm" style="margin-bottom:2px">
+                    <i class="fa-solid fa-filter"></i> Filtrar
+                </button>
+                <?php if ($usuarioFiltro > 0): ?>
+                    <a href="?estado=<?= htmlspecialchars($filtroEstado) ?>" class="btn btn-gris btn-sm" style="margin-bottom:2px">Limpiar</a>
+                <?php endif; ?>
+            </form>
         </div>
 
         <div class="tarjeta">
@@ -166,7 +212,7 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                 <td>
                                     <strong><?= htmlspecialchars($inc['nombre_completo']) ?></strong>
                                     <br><small style="color:var(--gris)">
-                                        <?= htmlspecialchars($inc['sucursal_nombre'] ?? '—') ?>
+                                        <?= htmlspecialchars($inc['sucursal_nombre'] ?? '-') ?>
                                     </small>
                                 </td>
                                 <td style="white-space:nowrap">
@@ -179,46 +225,58 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                     <?= htmlspecialchars($inc['motivo']) ?>
                                 </td>
                                 <td>
-                                    <span class="badge"
-                                          style="background:<?= $be['bg'] ?>;color:<?= $be['color'] ?>">
+                                    <span style="
+                                        display:inline-block;
+                                        background:<?= $be['bg'] ?>;
+                                        color:<?= $be['color'] ?>;
+                                        padding:.2rem .6rem;
+                                        border-radius:12px;
+                                        font-size:.8rem;
+                                        font-weight:600;
+                                    ">
                                         <?= ucfirst($inc['estado']) ?>
                                     </span>
                                     <?php if ($inc['estado'] !== 'pendiente' && $inc['admin_nombre']): ?>
-                                        <br><small style="color:var(--gris);font-size:.78rem">
+                                        <div style="font-size:.7rem;color:var(--gris);margin-top:.25rem">
                                             por <?= htmlspecialchars($inc['admin_nombre']) ?>
-                                        </small>
+                                        </div>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($inc['estado'] === 'pendiente'): ?>
-                                        <!-- Botón Aprobar -->
-                                        <form method="POST" action="responder.php"
-                                              style="display:inline"
-                                              onsubmit="return prepararRespuesta(this, 'aprobada')">
-                                            <input type="hidden" name="id"     value="<?= $inc['id'] ?>">
-                                            <input type="hidden" name="accion" value="aprobada">
-                                            <input type="hidden" name="respuesta" class="campo-respuesta" value="">
-                                            <button type="submit" class="btn btn-exito btn-sm">
-                                                <i class="fa-solid fa-check"></i> Aprobar
-                                            </button>
-                                        </form>
-                                        <!-- Botón Rechazar -->
-                                        <form method="POST" action="responder.php"
-                                              style="display:inline;margin-left:.35rem"
-                                              onsubmit="return prepararRespuesta(this, 'rechazada')">
-                                            <input type="hidden" name="id"     value="<?= $inc['id'] ?>">
-                                            <input type="hidden" name="accion" value="rechazada">
-                                            <input type="hidden" name="respuesta" class="campo-respuesta" value="">
-                                            <button type="submit" class="btn btn-peligro btn-sm">
-                                                <i class="fa-solid fa-xmark"></i> Rechazar
-                                            </button>
-                                        </form>
-                                    <?php elseif ($inc['respuesta']): ?>
-                                        <span style="font-size:.82rem;color:var(--gris)">
-                                            <?= htmlspecialchars($inc['respuesta']) ?>
-                                        </span>
+                                        <div style="display:flex;gap:.35rem">
+                                            <!-- Aprobar -->
+                                            <form method="POST" action="procesar.php" style="display:inline">
+                                                <input type="hidden" name="id" value="<?= $inc['id'] ?>">
+                                                <input type="hidden" name="accion" value="aprobar">
+                                                <button type="submit" class="btn btn-sm" style="background:#1d6f42;color:#fff;border:none;padding:.3rem .6rem" title="Aprobar" onclick="return confirm('¿Aprobar esta incidencia?');">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Rechazar -->
+                                            <form method="POST" action="procesar.php" style="display:inline" onsubmit="
+                                                let r = prompt('Escribe el motivo del rechazo (opcional):');
+                                                if(r===null) return false;
+                                                this.respuesta.value = r;
+                                                return true;
+                                            ">
+                                                <input type="hidden" name="id" value="<?= $inc['id'] ?>">
+                                                <input type="hidden" name="accion" value="rechazar">
+                                                <input type="hidden" name="respuesta" value="">
+                                                <button type="submit" class="btn btn-sm" style="background:#e74c3c;color:#fff;border:none;padding:.3rem .6rem" title="Rechazar">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     <?php else: ?>
-                                        <span style="color:var(--gris)">—</span>
+                                        <?php if ($inc['respuesta']): ?>
+                                            <div style="font-size:.8rem;color:var(--gris)">
+                                                <?= htmlspecialchars($inc['respuesta']) ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span style="color:var(--gris)">—</span>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -228,44 +286,6 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                 </div>
             <?php endif; ?>
         </div>
-
     </main>
-
-    <!-- Modal para Respuesta -->
-    <div id="modal-respuesta" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999; padding:1rem;">
-        <div style="background:#fff; padding:1.5rem; border-radius:12px; width:100%; max-width:380px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-            <h3 id="modal-titulo" style="margin-top:0; color:var(--primario); margin-bottom:1rem;"><i class="fa-solid fa-comment-dots"></i> Responder Solicitud</h3>
-            <div class="form-grupo" style="margin-bottom:1.5rem;">
-                <label for="modal-input">Observación (Opcional):</label>
-                <input type="text" id="modal-input" placeholder="Ej. Todo en orden..." style="width:100%; box-sizing:border-box;">
-            </div>
-            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-                <button type="button" class="btn btn-gris" onclick="cerrarModal()">Cancelar</button>
-                <button type="button" class="btn btn-primario" id="modal-btn-confirmar">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-    function prepararRespuesta(forma, accion) {
-        const etiqueta = accion === 'aprobada' ? 'Aprobar' : 'Rechazar';
-        document.getElementById('modal-titulo').innerHTML = '<i class="fa-solid fa-comment-dots"></i> ' + etiqueta + ' Solicitud';
-        document.getElementById('modal-input').value = '';
-        
-        document.getElementById('modal-btn-confirmar').onclick = function() {
-            forma.querySelector('.campo-respuesta').value = document.getElementById('modal-input').value;
-            forma.submit();
-        };
-        
-        document.getElementById('modal-respuesta').style.display = 'flex';
-        setTimeout(() => document.getElementById('modal-input').focus(), 100);
-        return false; // previene el envo automtico
-    }
-
-    function cerrarModal() {
-        document.getElementById('modal-respuesta').style.display = 'none';
-    }
-    </script>
-
 </body>
 </html>
