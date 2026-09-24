@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../auth.php';
+require_once __DIR__ . '/../../reportes_helper.php';
+
 requerirRol(['administrador', 'supervisor']);
 
 $pdo = conectarBD();
@@ -9,45 +11,7 @@ $mes = filter_input(INPUT_GET, 'mes', FILTER_VALIDATE_INT) ?: (int)date('n');
 $anio = filter_input(INPUT_GET, 'anio', FILTER_VALIDATE_INT) ?: (int)date('Y');
 $usuarioFiltro = filter_input(INPUT_GET, 'usuario_id', FILTER_VALIDATE_INT) ?: 0;
 
-$where = "YEAR(ma.fecha_hora) = ? AND MONTH(ma.fecha_hora) = ?";
-$params = [$anio, $mes];
-
-if ($usuarioFiltro > 0) {
-    $where .= " AND ma.usuario_id = ?";
-    $params[] = $usuarioFiltro;
-}
-
-$sql = "
-    SELECT
-        ma.id, ma.tipo, ma.fecha_hora, ma.dentro_geocerca, ma.minutos_variacion,
-        u.id AS usuario_id,
-        u.nombre_completo,
-        s.nombre AS sucursal_nombre,
-        (SELECT COUNT(*) FROM incidencias i 
-          WHERE i.usuario_id = ma.usuario_id 
-            AND i.fecha = DATE(ma.fecha_hora) 
-            AND i.estado = 'aprobada') AS incidencias_dia
-    FROM marcas_asistencia ma
-    JOIN usuarios u ON ma.usuario_id = u.id
-    JOIN sucursales s ON ma.sucursal_id = s.id
-    WHERE $where
-    ORDER BY u.nombre_completo ASC, ma.fecha_hora ASC
-";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$marcas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$porColaborador = [];
-foreach ($marcas as $m) {
-    $uid = $m['usuario_id'];
-    if (!isset($porColaborador[$uid])) {
-        $porColaborador[$uid] = [
-            'nombre' => $m['nombre_completo'],
-            'marcas' => []
-        ];
-    }
-    $porColaborador[$uid]['marcas'][] = $m;
-}
+$reporteDatos = obtenerReporteMensual($pdo, $anio, $mes, $usuarioFiltro);
 
 $filename = "Reporte_GLEE_{$anio}_{$mes}.xls";
 header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
@@ -84,30 +48,8 @@ echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
                 <Cell ss:StyleID="Header"><Data ss:Type="String">Total Marcas</Data></Cell>
                 <Cell ss:StyleID="Header"><Data ss:Type="String">Saldo Neto (Bolsa de Horas)</Data></Cell>
             </Row>
-            <?php foreach ($porColaborador as $uid => $datos): 
-                $diasTrabajados = count(array_unique(array_map(fn($m) => substr($m['fecha_hora'], 0, 10), $datos['marcas'])));
-                
-                // Agrupar por día igual que en la web
-                $resumenDiarioXLS = [];
-                foreach ($datos['marcas'] as $m) {
-                    $fecha = substr($m['fecha_hora'], 0, 10);
-                    if ($m['minutos_variacion'] !== null) {
-                        $resumenDiarioXLS[$fecha] = [
-                            'varianza' => (int)$m['minutos_variacion'],
-                            'justificada' => $m['incidencias_dia'] > 0
-                        ];
-                    }
-                }
-                
-                $saldoNeto = 0;
-                foreach ($resumenDiarioXLS as $dia) {
-                    if ($dia['varianza'] > 0 && $dia['justificada']) {
-                        continue;
-                    }
-                    $saldoNeto += $dia['varianza'];
-                }
-                
-                // Formateo de texto amigable para la bolsa de horas
+            <?php foreach ($reporteDatos as $datos): 
+                $saldoNeto = $datos['saldo_neto'];
                 if ($saldoNeto === 0) {
                     $saldoTxt = "0 min";
                 } elseif ($saldoNeto > 0) {
@@ -118,44 +60,63 @@ echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
             ?>
             <Row>
                 <Cell><Data ss:Type="String"><?= htmlspecialchars($datos['nombre']) ?></Data></Cell>
-                <Cell><Data ss:Type="Number"><?= $diasTrabajados ?></Data></Cell>
-                <Cell><Data ss:Type="Number"><?= count($datos['marcas']) ?></Data></Cell>
+                <Cell><Data ss:Type="Number"><?= $datos['dias_trabajados'] ?></Data></Cell>
+                <Cell><Data ss:Type="Number"><?= $datos['total_marcas'] ?></Data></Cell>
                 <Cell><Data ss:Type="String"><?= $saldoTxt ?></Data></Cell>
             </Row>
             <?php endforeach; ?>
         </Table>
     </Worksheet>
 
-    <?php foreach ($porColaborador as $uid => $datos): 
-        // Excel worksheet names have a max limit of 31 chars and can't contain certain symbols
+    <?php foreach ($reporteDatos as $datos): 
         $sheetName = substr(preg_replace('/[^a-zA-Z0-9 ]/', '', $datos['nombre']), 0, 31);
     ?>
     <Worksheet ss:Name="<?= htmlspecialchars($sheetName) ?>">
         <Table>
             <Column ss:Width="120" />
             <Column ss:Width="100" />
-            <Column ss:Width="180" />
-            <Column ss:Width="120" />
+            <Column ss:Width="100" />
+            <Column ss:Width="100" />
+            <Column ss:Width="100" />
             <Column ss:Width="150" />
+            <Column ss:Width="120" />
             <Row>
-                <Cell ss:StyleID="Header"><Data ss:Type="String">Fecha y Hora</Data></Cell>
-                <Cell ss:StyleID="Header"><Data ss:Type="String">Tipo</Data></Cell>
-                <Cell ss:StyleID="Header"><Data ss:Type="String">Sucursal</Data></Cell>
-                <Cell ss:StyleID="Header"><Data ss:Type="String">Varianza (Minutos)</Data></Cell>
-                <Cell ss:StyleID="Header"><Data ss:Type="String">Incidencias Aprobadas</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">Fecha</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">Entrada</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">S. Comida</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">R. Comida</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">Salida</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">Balance (Minutos)</Data></Cell>
+                <Cell ss:StyleID="Header"><Data ss:Type="String">Notas</Data></Cell>
             </Row>
-            <?php foreach ($datos['marcas'] as $m): 
-                $fechaHora = date('d/m/Y H:i:s', strtotime($m['fecha_hora']));
-                $tipo = ucfirst(str_replace('_', ' ', $m['tipo']));
-                $var = $m['minutos_variacion'] === null ? '' : (int)$m['minutos_variacion'];
-                $incidencias = $m['incidencias_dia'] > 0 ? 'Sí' : 'No';
+            <?php foreach ($datos['resumen_diario'] as $dia): 
+                $fechaFormat = date('d/m/Y', strtotime($dia['fecha']));
+                $entrada = $dia['entrada'] ?: '-';
+                $scomida = $dia['salida_comida'] ?: '-';
+                $rcomida = $dia['regreso_comida'] ?: '-';
+                $salida = $dia['salida'] ?: '-';
+                
+                $notas = '';
+                if ($dia['ausencia'] && !$dia['justificada']) {
+                    $notas = 'Ausencia Injustificada';
+                } elseif ($dia['justificada'] && $dia['ausencia']) {
+                    $notas = 'Falta Justificada';
+                } elseif ($dia['justificada'] && $dia['varianza'] > 0) {
+                    $notas = 'Retardo Justificado';
+                } elseif ($dia['vino']) {
+                    $notas = 'Asistió';
+                }
+
+                $var = $dia['varianza'] === null ? '' : (int)$dia['varianza'];
             ?>
             <Row>
-                <Cell><Data ss:Type="String"><?= $fechaHora ?></Data></Cell>
-                <Cell><Data ss:Type="String"><?= $tipo ?></Data></Cell>
-                <Cell><Data ss:Type="String"><?= htmlspecialchars($m['sucursal_nombre']) ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $fechaFormat ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $entrada ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $scomida ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $rcomida ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $salida ?></Data></Cell>
                 <Cell><Data ss:Type="<?= $var === '' ? 'String' : 'Number' ?>"><?= $var ?></Data></Cell>
-                <Cell><Data ss:Type="String"><?= $incidencias ?></Data></Cell>
+                <Cell><Data ss:Type="String"><?= $notas ?></Data></Cell>
             </Row>
             <?php endforeach; ?>
         </Table>

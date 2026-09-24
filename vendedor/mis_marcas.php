@@ -70,6 +70,40 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
             <h2><i class="fa-solid fa-clock-rotate-left"></i> Mis Marcas de Asistencia</h2>
         </div>
 
+        <?php
+        require_once __DIR__ . '/../reportes_helper.php';
+        $reporteMesActual = obtenerReporteMensual($pdo, (int)date('Y'), (int)date('n'), $usuarioId);
+        $miSaldo = 0;
+        $misDiasTrabajados = 0;
+        if (!empty($reporteMesActual)) {
+            $miSaldo = $reporteMesActual[0]['saldo_neto'];
+            $misDiasTrabajados = $reporteMesActual[0]['dias_trabajados'];
+        }
+        ?>
+        
+        <div class="tarjeta" style="margin-bottom:1rem;padding:1.5rem; text-align:center;">
+            <h3 style="margin-bottom:0.5rem; color:var(--gris); font-size:0.9rem; text-transform:uppercase;">Resumen del Mes Actual</h3>
+            <div style="display:flex; justify-content:center; gap:3rem; flex-wrap:wrap;">
+                <div>
+                    <span style="font-size:2rem; font-weight:800; color:var(--primario); display:block;"><?= $misDiasTrabajados ?></span>
+                    <span style="font-size:0.8rem; color:var(--gris);">Días Laborados</span>
+                </div>
+                <div>
+                    <?php if ($miSaldo === 0): ?>
+                        <span style="font-size:2rem; font-weight:800; color:var(--gris); display:block;">0 min</span>
+                        <span style="font-size:0.8rem; color:var(--gris);">Saldo de Horas (Al Día)</span>
+                    <?php elseif ($miSaldo > 0): ?>
+                        <span style="font-size:2rem; font-weight:800; color:var(--peligro, #c0392b); display:block;">-<?= $miSaldo ?> min</span>
+                        <span style="font-size:0.8rem; color:var(--gris);">Tiempo en contra (Deuda)</span>
+                    <?php else: ?>
+                        <span style="font-size:2rem; font-weight:800; color:#1d6f42; display:block;">+<?= abs($miSaldo) ?> min</span>
+                        <span style="font-size:0.8rem; color:var(--gris);">Tiempo a favor (Extra)</span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; color:var(--gris); margin-top:1rem; font-style:italic;">* Las ausencias sin justificar descuentan 8 horas. Retardos con incidencia médica son perdonados.</p>
+        </div>
+
         <div class="tarjeta" style="margin-bottom:1rem;padding:1rem 1.25rem">
             <form method="GET" action="" style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
                 <div class="form-grupo" style="margin:0;flex:1;min-width:160px">
