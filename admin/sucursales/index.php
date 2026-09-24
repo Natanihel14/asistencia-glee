@@ -97,17 +97,17 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div style="display:flex; gap:0.5rem;">
-                                    <a href="editar.php?id=<?= $s['id'] ?>" class="btn btn-acento btn-sm">
+                                <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                    <a href="editar.php?id=<?= $s['id'] ?>" class="btn btn-acento btn-sm" style="text-align:center;">
                                         <i class="fa-solid fa-pen"></i> Editar
                                     </a>
                                     
-                                    <form method="POST" action="eliminar.php" style="display:inline" onsubmit="return confirm('¿Seguro que deseas <?= $s['activo'] ? 'desactivar' : 'activar' ?> esta sucursal?');">
+                                    <form method="POST" action="eliminar.php" style="margin:0;" onsubmit="return confirm('¿Seguro que deseas <?= $s['activo'] ? 'desactivar' : 'activar' ?> esta sucursal?');">
                                         <input type="hidden" name="id" value="<?= $s['id'] ?>">
                                         <?php if ($s['activo']): ?>
-                                            <button type="submit" class="btn btn-peligro btn-sm"><i class="fa-solid fa-ban"></i> Desactivar</button>
+                                            <button type="submit" class="btn btn-peligro btn-sm" style="width:100%;"><i class="fa-solid fa-ban"></i> Desactivar</button>
                                         <?php else: ?>
-                                            <button type="submit" class="btn btn-primario btn-sm" style="background:#1d6f42; border-color:#1d6f42;"><i class="fa-solid fa-check"></i> Activar</button>
+                                            <button type="submit" class="btn btn-primario btn-sm" style="background:#1d6f42; border-color:#1d6f42; width:100%;"><i class="fa-solid fa-check"></i> Activar</button>
                                         <?php endif; ?>
                                     </form>
                                 </div>
