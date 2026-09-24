@@ -100,9 +100,11 @@ echo '<?mso-application progid="Excel.Sheet"?>' . "\n";
                 if ($dia['ausencia'] && !$dia['justificada']) {
                     $notas = 'Ausencia Injustificada';
                 } elseif ($dia['justificada'] && $dia['ausencia']) {
-                    $notas = 'Falta Justificada';
+                    $incInfo = ucfirst(str_replace('_', ' ', $dia['incidencia_detalle']['tipo'])) . ': ' . $dia['incidencia_detalle']['motivo'];
+                    $notas = 'Falta Justificada - ' . $incInfo;
                 } elseif ($dia['justificada'] && $dia['varianza'] > 0) {
-                    $notas = 'Retardo Justificado';
+                    $incInfo = ucfirst(str_replace('_', ' ', $dia['incidencia_detalle']['tipo'])) . ': ' . $dia['incidencia_detalle']['motivo'];
+                    $notas = 'Retardo Justificado - ' . $incInfo;
                 } elseif ($dia['vino']) {
                     $notas = 'Asistió';
                 }

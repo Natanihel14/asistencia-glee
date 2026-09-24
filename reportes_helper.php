@@ -34,10 +34,13 @@ function obtenerReporteMensual($pdo, $anio, $mes, $usuarioId = 0) {
 
     // 3. Obtener incidencias aprobadas del mes
     $incidenciasMap = [];
-    $stmtI = $pdo->prepare("SELECT usuario_id, fecha FROM incidencias WHERE usuario_id IN ($inIds) AND estado = 'aprobada' AND YEAR(fecha) = ? AND MONTH(fecha) = ?");
+    $stmtI = $pdo->prepare("SELECT usuario_id, fecha, tipo, motivo FROM incidencias WHERE usuario_id IN ($inIds) AND estado = 'aprobada' AND YEAR(fecha) = ? AND MONTH(fecha) = ?");
     $stmtI->execute([$anio, $mes]);
     foreach ($stmtI->fetchAll(PDO::FETCH_ASSOC) as $inc) {
-        $incidenciasMap[$inc['usuario_id']][$inc['fecha']] = true;
+        $incidenciasMap[$inc['usuario_id']][$inc['fecha']] = [
+            'tipo' => $inc['tipo'],
+            'motivo' => $inc['motivo']
+        ];
     }
 
     // 4. Obtener marcas del mes
@@ -81,7 +84,8 @@ function obtenerReporteMensual($pdo, $anio, $mes, $usuarioId = 0) {
             
             // ¿Estaba programado para trabajar este dia?
             $debeTrabajar = isset($horariosMap[$uid][$diaSemana]);
-            $tieneIncidencia = isset($incidenciasMap[$uid][$fecha]);
+            $incidenciaAprobada = $incidenciasMap[$uid][$fecha] ?? null;
+            $tieneIncidencia = ($incidenciaAprobada !== null);
             $marcasDelDia = $marcasMap[$uid][$fecha] ?? [];
 
             // Si no tenia horario y no vino, no pasa nada
@@ -144,6 +148,7 @@ function obtenerReporteMensual($pdo, $anio, $mes, $usuarioId = 0) {
                 'salida' => $salida,
                 'varianza' => $varianza,
                 'justificada' => $tieneIncidencia,
+                'incidencia_detalle' => $incidenciaAprobada,
                 'sucursal' => $sucursal,
                 'vino' => !empty($marcasDelDia),
                 'ausencia' => $esAusencia

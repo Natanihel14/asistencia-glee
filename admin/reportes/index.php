@@ -197,8 +197,10 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                     </td>
                                     
                                     <td>
-                                        <?php if ($dia['justificada']): ?>
-                                            <a href="/admin/incidencias/index.php?estado=aprobada" class="badge-justificada" style="text-decoration:none; display:inline-block">
+                                        <?php if ($dia['justificada']): 
+                                            $incTxt = htmlspecialchars(ucfirst(str_replace('_', ' ', $dia['incidencia_detalle']['tipo'])) . ' - ' . $dia['incidencia_detalle']['motivo']);
+                                        ?>
+                                            <a href="/admin/incidencias/index.php?estado=aprobada" class="badge-justificada" style="text-decoration:none; display:inline-block" title="<?= $incTxt ?>">
                                                 <i class="fa-solid fa-file-circle-check"></i> Justificada
                                             </a>
                                         <?php else: ?>
