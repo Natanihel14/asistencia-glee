@@ -58,8 +58,9 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
             </div>
         <?php endif; ?>
 
-        <div class="seccion-header">
+        <div class="seccion-header" style="display:flex; justify-content:space-between; align-items:center;">
             <h2><i class="fa-solid fa-store"></i> Sucursales GLEE</h2>
+            <a href="crear.php" class="btn btn-primario"><i class="fa-solid fa-plus"></i> Nueva Sucursal</a>
         </div>
 
         <div class="tarjeta">
@@ -96,11 +97,21 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="editar.php?id=<?= $s['id'] ?>" class="btn btn-acento btn-sm">
-                                    <i class="fa-solid fa-pen"></i> Editar
-                                </a>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <a href="editar.php?id=<?= $s['id'] ?>" class="btn btn-acento btn-sm">
+                                        <i class="fa-solid fa-pen"></i> Editar
+                                    </a>
+                                    
+                                    <form method="POST" action="eliminar.php" style="display:inline" onsubmit="return confirm('¿Seguro que deseas <?= $s['activo'] ? 'desactivar' : 'activar' ?> esta sucursal?');">
+                                        <input type="hidden" name="id" value="<?= $s['id'] ?>">
+                                        <?php if ($s['activo']): ?>
+                                            <button type="submit" class="btn btn-peligro btn-sm"><i class="fa-solid fa-ban"></i> Desactivar</button>
+                                        <?php else: ?>
+                                            <button type="submit" class="btn btn-primario btn-sm" style="background:#1d6f42; border-color:#1d6f42;"><i class="fa-solid fa-check"></i> Activar</button>
+                                        <?php endif; ?>
+                                    </form>
+                                </div>
                             </td>
-                        </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table></div>
