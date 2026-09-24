@@ -24,8 +24,8 @@ $usuarioFiltro = filter_input(INPUT_GET, 'usuario_id', FILTER_VALIDATE_INT) ?: 0
 $colaboradores = $pdo->query("
     SELECT id, nombre_completo
       FROM usuarios
-     WHERE rol IN ('vendedor','bodega')
-     ORDER BY activo DESC, nombre_completo ASC
+     WHERE rol IN ('vendedor','bodega') AND activo = 1
+     ORDER BY nombre_completo ASC
 ")->fetchAll();
 
 $reporteDatos = obtenerReporteMensual($pdo, $anio, $mes, $usuarioFiltro);

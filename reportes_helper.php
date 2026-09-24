@@ -6,7 +6,7 @@
 
 function obtenerReporteMensual($pdo, $anio, $mes, $usuarioId = 0) {
     // 1. Obtener empleados
-    $sqlUsu = "SELECT id, nombre_completo, rol, tipo_jornada, DATE(created_at) AS fecha_creacion FROM usuarios WHERE rol IN ('vendedor','bodega')";
+    $sqlUsu = "SELECT id, nombre_completo, rol, tipo_jornada, DATE(created_at) AS fecha_creacion FROM usuarios WHERE rol IN ('vendedor','bodega') AND activo = 1";
     $paramsUsu = [];
     if ($usuarioId > 0) {
         $sqlUsu .= " AND id = ?";
