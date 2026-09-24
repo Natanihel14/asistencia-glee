@@ -101,7 +101,6 @@ $nombre = htmlspecialchars($_SESSION['nombre_completo']);
                     <?php endif; ?>
                 </div>
             </div>
-            <p style="font-size:0.8rem; color:var(--gris); margin-top:1rem; font-style:italic;">* Las ausencias sin justificar descuentan 8 horas. Retardos con incidencia médica son perdonados.</p>
         </div>
 
         <div class="tarjeta" style="margin-bottom:1rem;padding:1rem 1.25rem">
