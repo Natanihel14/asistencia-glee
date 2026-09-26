@@ -542,7 +542,9 @@ $ultimaEtiqueta = $ultimaMarca
                 const descriptorDB = new Float32Array(Object.values(descriptorDBArray));
                 const distance = faceapi.euclideanDistance(detection.descriptor, descriptorDB);
                 
-                if (distance < 0.55) {
+                // Umbral original 0.55. Se ajusta a 0.60 por recomendación de la librería
+                // para evitar falsos rechazos debido a baja iluminación o menor resolución.
+                if (distance < 0.60) {
                     form.submit();
                 } else {
                     Swal.fire('Intento de Suplantación', 'El rostro detectado NO coincide con el tuyo.', 'error');
