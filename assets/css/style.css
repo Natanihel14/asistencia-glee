@@ -225,7 +225,7 @@ a:hover { color: var(--primario-h); text-decoration: underline; }
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.btn:active { transform: translateY(0); box-shadow: none; }
+.btn:active { transform: scale(0.96); box-shadow: none; }
 
 .btn-primario  { background: var(--primario);  color: var(--blanco); }
 .btn-acento    { background: var(--acento);    color: var(--blanco); }
@@ -306,6 +306,11 @@ a:hover { color: var(--primario-h); text-decoration: underline; }
   transform: translateY(-4px);
   text-decoration: none;
   color: var(--texto);
+}
+
+.menu-tarjeta:active {
+  transform: scale(0.98);
+  box-shadow: none;
 }
 
 .menu-tarjeta.peligro:hover { border-color: #fca5a5; background: #fffbfa; }
