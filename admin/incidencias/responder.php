@@ -25,8 +25,8 @@ if (!$id || !in_array($accion, ['aprobada', 'rechazada'], true)) {
 
 $pdo = conectarBD();
 
-// Verificar que la incidencia existe y está pendiente
-$stmtV = $pdo->prepare('SELECT id, estado FROM incidencias WHERE id = ? LIMIT 1');
+// Verificar que la incidencia existe y estǭ pendiente
+$stmtV = $pdo->prepare('SELECT id, estado, usuario_id, tipo FROM incidencias WHERE id = ? LIMIT 1');
 $stmtV->execute([$id]);
 $inc = $stmtV->fetch();
 
@@ -55,6 +55,15 @@ $stmt->execute([
     $_SESSION['usuario_id'],
     $id,
 ]);
+
+// Disparar Notificación Push al Empleado
+require_once '../../onesignal_helper.php';
+$etiquetaNoti = ($accion === 'aprobada') ? 'Aprobada' : 'Rechazada';
+enviarNotificacionUsuario(
+    $inc['usuario_id'],
+    "Permiso " . $etiquetaNoti,
+    "Tu solicitud por '" . htmlspecialchars($inc['tipo']) . "' ha sido " . strtolower($etiquetaNoti) . ". Revisa tu panel para más detalles."
+);
 
 $etiqueta = ($accion === 'aprobada') ? 'aprobada' : 'rechazada';
 $_SESSION['flash_msg']  = 'Incidencia ' . $etiqueta . ' correctamente.';

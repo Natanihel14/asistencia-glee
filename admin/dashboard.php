@@ -163,5 +163,21 @@ $rol    = ucfirst($_SESSION['rol']);
         });
       }
     </script>
+
+    <!-- OneSignal Web Push Integration -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "0d8bb111-847d-47b8-9d77-f3a34a26486c",
+          notifyButton: { enable: true }
+        });
+        
+        // Identificar al usuario en OneSignal
+        OneSignal.login("USUARIO_<?php echo $_SESSION['usuario_id']; ?>");
+        OneSignal.User.addTag("rol", "Administrador");
+      });
+    </script>
 </body>
 </html>

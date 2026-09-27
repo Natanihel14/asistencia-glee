@@ -53,6 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ');
         $stmt->execute([$usuarioId, $d['fecha'], $d['tipo'], $d['motivo']]);
 
+        // Disparar Notificación Push a los Administradores
+        require_once '../onesignal_helper.php';
+        enviarNotificacionAdmins(
+            "Nueva Solicitud de Permiso",
+            "Un empleado ha solicitado un permiso o justificación. Ingresa para revisarlo."
+        );
+
         $_SESSION['flash_msg']  = 'Solicitud enviada correctamente. El administrador la revisará pronto.';
         $_SESSION['flash_tipo'] = 'exito';
         header('Location: ' . APP_URL . '/vendedor/incidencias.php');

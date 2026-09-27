@@ -1,3 +1,4 @@
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 const CACHE_NAME = 'glee-cache-v2';
 const urlsToCache = [
   '/assets/css/style.css',
